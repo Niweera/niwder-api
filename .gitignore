@@ -1,0 +1,6 @@
+.idea/
+node_modules/
+.env
+dist/
+package-lock.json
+serviceAccountKey.json
