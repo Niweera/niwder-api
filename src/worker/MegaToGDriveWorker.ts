@@ -54,6 +54,7 @@ export default class MegaToGDriveWorker {
               filePath,
               fileMimeType: mime.lookup(filePath) || "application/octet-stream",
               fileSize: file.size,
+              directory: file.directory,
             });
           } else {
             reject(new Error(`${filePath} is missing`));
@@ -68,14 +69,16 @@ export default class MegaToGDriveWorker {
   private uploadToGDrive = async (
     fileName: string,
     filePath: string,
-    fileMimeType: string
+    fileMimeType: string,
+    directory: boolean
   ): Promise<string> => {
     console.log(`now uploading ${filePath} to GDrive`);
     const gDriveService: GDriveService = new GDriveService(this.job);
     const shareLink = await gDriveService.uploadFile(
       fileName,
       filePath,
-      fileMimeType
+      fileMimeType,
+      directory
     );
     await this.job.updateProgress(98);
     rmSync(path.dirname(filePath), { recursive: true });
@@ -86,17 +89,21 @@ export default class MegaToGDriveWorker {
     driveLink: string,
     fileName: string,
     fileSize: number,
-    fileMimeType: string
+    fileMimeType: string,
+    directory: boolean
   ): Promise<void> => {
     const userRef: database.Reference = db.ref("transfers");
-    await userRef.child(this.job.data.uid).child("mega-to-gdrive").push({
-      megaLink: this.job.data.url,
-      gDriveLink: driveLink,
-      timestamp: ServerValue.TIMESTAMP,
-      name: fileName,
-      size: fileSize,
-      mimeType: fileMimeType,
-    });
+    await userRef
+      .child(this.job.data.uid)
+      .child("mega-to-gdrive")
+      .push({
+        megaLink: this.job.data.url,
+        gDriveLink: driveLink,
+        timestamp: ServerValue.TIMESTAMP,
+        name: fileName,
+        size: fileSize,
+        mimeType: directory ? "inode/directory" : fileMimeType,
+      });
     await this.job.updateProgress(99);
   };
 
@@ -116,13 +123,15 @@ export default class MegaToGDriveWorker {
     const driveLink: string = await this.uploadToGDrive(
       fileObject.fileName,
       fileObject.filePath,
-      fileObject.fileMimeType
+      fileObject.fileMimeType,
+      fileObject.directory
     );
     await this.recordDownloadURL(
       driveLink,
       fileObject.fileName,
       fileObject.fileSize,
-      fileObject.fileMimeType
+      fileObject.fileMimeType,
+      fileObject.directory
     );
     await this.sendFCMNotification(fileObject.fileName, driveLink);
   };

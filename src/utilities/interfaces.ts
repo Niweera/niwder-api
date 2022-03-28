@@ -3,4 +3,5 @@ export type FileObject = {
   filePath: string;
   fileMimeType: string;
   fileSize: number;
+  directory: boolean;
 };

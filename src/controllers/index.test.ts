@@ -7,7 +7,7 @@ describe("POST /mega-to-gdrive", () => {
     const res: request.Response = await request(app)
       .post("/api/mega-to-gdrive")
       .send({
-        url: `https://mega.nz/folder/U0Q1kTpL#TbQNV7_6G3x8w_9Fma_THw`,
+        url: `https://mega.nz/folder/xspkCBpa#a0oa70caa9nvTpufH6bm6g`,
       })
       .set("Authorization", `Bearer ${await getIDToken()}`);
 

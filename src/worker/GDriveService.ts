@@ -1,8 +1,10 @@
 import { Auth, drive_v3, google } from "googleapis";
 import keys from "../keys";
-import { createReadStream, existsSync } from "fs";
+import { createReadStream, existsSync, readdirSync, statSync } from "fs";
 import type { Job } from "bullmq";
 import type { GaxiosResponse } from "gaxios";
+import path from "path";
+import mime from "mime-types";
 
 export default class GDriveService {
   private readonly drive: drive_v3.Drive;
@@ -86,7 +88,7 @@ export default class GDriveService {
     return webViewLinkData?.data?.webViewLink;
   };
 
-  public uploadFile = async (
+  private uploadSingleFile = async (
     fileName: string,
     filePath: string,
     fileMimeType: string
@@ -111,5 +113,104 @@ export default class GDriveService {
 
     await this.job.updateProgress(97);
     return shareURL;
+  };
+
+  private static getAllFiles = async (
+    dirPath: string,
+    arrayOfIDs: string[],
+    drive: drive_v3.Drive,
+    parentID: string
+  ) => {
+    let files = readdirSync(dirPath);
+
+    const promises = files.map(async (file) => {
+      let filePath: string = `${dirPath}/${file}`;
+      if (statSync(filePath).isDirectory()) {
+        const response = await drive.files.create({
+          requestBody: {
+            name: file,
+            parents: [parentID],
+            mimeType: "application/vnd.google-apps.folder",
+          },
+          fields: "id",
+        });
+        arrayOfIDs = await GDriveService.getAllFiles(
+          filePath,
+          arrayOfIDs,
+          drive,
+          response.data.id
+        );
+      } else {
+        const fileMimeType = mime.lookup(file) || "application/octet-stream";
+        await drive.files.create({
+          requestBody: {
+            name: file,
+            mimeType: fileMimeType,
+            parents: [parentID],
+          },
+          media: {
+            mimeType: fileMimeType,
+            body: createReadStream(path.join(dirPath, file)),
+          },
+        });
+        arrayOfIDs.push(parentID);
+      }
+    });
+
+    await Promise.all(promises);
+    return arrayOfIDs;
+  };
+
+  private uploadDirectory = async (
+    fileName: string,
+    filePath: string
+  ): Promise<string> => {
+    if (!existsSync(filePath)) {
+      throw Error(`${filePath} does not exist`);
+    }
+
+    const folderName = "Niwder";
+    let folder = await this.searchFolder(folderName);
+
+    if (!folder) {
+      folder = await this.createFolder(folderName);
+    }
+
+    const fileIDs: string[] = await GDriveService.getAllFiles(
+      path.dirname(filePath),
+      [],
+      this.drive,
+      folder.id
+    );
+
+    await this.drive.permissions.create({
+      fileId: fileIDs[0],
+      requestBody: {
+        role: "reader",
+        type: "anyone",
+      },
+    });
+
+    const webViewLinkData: GaxiosResponse<drive_v3.Schema$File> =
+      await this.drive.files.get({
+        fileId: fileIDs[0],
+        fields: "webViewLink",
+      });
+
+    await this.job.updateProgress(97);
+    return webViewLinkData?.data?.webViewLink;
+  };
+
+  public uploadFile = async (
+    fileName: string,
+    filePath: string,
+    fileMimeType: string,
+    directory: boolean
+  ): Promise<string> => {
+    if (directory) {
+      return await this.uploadDirectory(fileName, filePath);
+    } else {
+      return await this.uploadSingleFile(fileName, filePath, fileMimeType);
+    }
   };
 }
