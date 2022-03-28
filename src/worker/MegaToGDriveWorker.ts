@@ -10,6 +10,7 @@ import GDriveService from "./GDriveService";
 import type { FileObject } from "../utilities/interfaces";
 import mime from "mime-types";
 import { spawn } from "child_process";
+import FCMService from "./FCMService";
 
 export default class MegaToGDriveWorker {
   private readonly job: Job;
@@ -76,7 +77,7 @@ export default class MegaToGDriveWorker {
       filePath,
       fileMimeType
     );
-    await this.job.updateProgress(99);
+    await this.job.updateProgress(98);
     rmSync(path.dirname(filePath), { recursive: true });
     return shareLink;
   };
@@ -87,7 +88,7 @@ export default class MegaToGDriveWorker {
     fileSize: number,
     fileMimeType: string
   ): Promise<void> => {
-    const userRef: database.Reference = db.ref("users");
+    const userRef: database.Reference = db.ref("transfers");
     await userRef.child(this.job.data.uid).child("mega-to-gdrive").push({
       megaLink: this.job.data.url,
       gDriveLink: driveLink,
@@ -96,6 +97,15 @@ export default class MegaToGDriveWorker {
       size: fileSize,
       mimeType: fileMimeType,
     });
+    await this.job.updateProgress(99);
+  };
+
+  private sendFCMNotification = async (
+    fileName: string,
+    link: string
+  ): Promise<void> => {
+    const fcmService: FCMService = new FCMService(this.job.data.uid);
+    await fcmService.sendFCM(fileName, link);
     await this.job.updateProgress(100);
   };
 
@@ -114,5 +124,6 @@ export default class MegaToGDriveWorker {
       fileObject.fileSize,
       fileObject.fileMimeType
     );
+    await this.sendFCMNotification(fileObject.fileName, driveLink);
   };
 }

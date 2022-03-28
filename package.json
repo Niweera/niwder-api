@@ -1,6 +1,6 @@
 {
   "name": "niwder-api",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "API for Niwder; Download, upload, and go wild with Mega, Google Drive and direct download links.",
   "main": "dist/index.js",
   "scripts": {
@@ -55,6 +55,6 @@
   },
   "engines": {
     "node": "v16.14.0",
-    "npm": "8.3.0"
+    "npm": "8.5.5"
   }
 }

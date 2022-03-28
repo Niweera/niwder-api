@@ -109,8 +109,7 @@ export default class GDriveService {
       folder.id
     );
 
-    await this.job.updateProgress(98);
-
+    await this.job.updateProgress(97);
     return shareURL;
   };
 }
