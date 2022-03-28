@@ -10,7 +10,8 @@
     "serve": "nodemon src/index.ts",
     "serve-worker": "nodemon src/worker/index.ts",
     "lint": "eslint . --ext .ts",
-    "test": "jest"
+    "test": "jest",
+    "postinstall": "chmod +x ./postinstall && ./postinstall"
   },
   "author": "Nipuna Weerasekara",
   "license": "MIT",

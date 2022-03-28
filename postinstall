@@ -1,0 +1,13 @@
+#!/bin/bash
+
+if  [ -x "$(command -v mega-get)" ]; then
+  echo 'MegaCMD is installed.' >&2
+  exit 0
+fi
+
+if ! [ -x "$(command -v mega-get)" ]; then
+  echo 'MegaCMD is not installed, now installing.' >&2
+  wget "https://mega.nz/linux/repo/xUbuntu_20.04/amd64/megacmd-xUbuntu_20.04_amd64.deb" -P ~/
+  sudo apt install ~/megacmd-xUbuntu_20.04_amd64.deb -y
+  exit 0
+fi
