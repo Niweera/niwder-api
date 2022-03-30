@@ -10,12 +10,30 @@ import { getIDToken } from "../middleware/firebaser.test";
 const folderFile =
   "https://mega.nz/folder/xspkCBpa#a0oa70caa9nvTpufH6bm6g/file/txpSSQZZ";
 
+const gDriveFile =
+  "https://drive.google.com/file/d/17uhXkmL2-FvmET_-Y63hB-ExumqzFB4-/view?usp=sharing";
+//const gDriveFoldr =
+//  "https://drive.google.com/drive/folders/1aqq4tcKu2im0rp7if7j_dlDTQIl4Q2LR?usp=sharing";
+
 describe("POST /mega-to-gdrive", () => {
   it("Should return HTTP 204", async () => {
     const res: request.Response = await request(app)
       .post("/api/mega-to-gdrive")
       .send({
         url: folderFile,
+      })
+      .set("Authorization", `Bearer ${await getIDToken()}`);
+
+    expect(res.status).toBe(204);
+  });
+});
+
+describe("POST /gdrive-to-mega", () => {
+  it("Should return HTTP 204", async () => {
+    const res: request.Response = await request(app)
+      .post("/api/gdrive-to-mega")
+      .send({
+        url: gDriveFile,
       })
       .set("Authorization", `Bearer ${await getIDToken()}`);
 

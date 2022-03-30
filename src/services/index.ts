@@ -22,4 +22,17 @@ export default class Service {
     });
     console.log(`job added [${job.name}] [${url}]`);
   };
+
+  gDriveToMega = async (url: string, uid: string): Promise<void> => {
+    const name: string = createHash("sha256")
+      .update(url)
+      .digest("hex")
+      .slice(0, 10);
+    const job: Job = await queue.add(name, {
+      queue: keys.GDRIVE_TO_MEGA_QUEUE,
+      url,
+      uid,
+    });
+    console.log(`job added [${job.name}] [${url}]`);
+  };
 }

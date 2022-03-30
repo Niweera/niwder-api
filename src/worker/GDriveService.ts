@@ -1,10 +1,19 @@
 import { Auth, drive_v3, google } from "googleapis";
 import keys from "../keys";
-import { createReadStream, existsSync, readdirSync, statSync } from "fs";
+import {
+  createReadStream,
+  createWriteStream,
+  existsSync,
+  readdirSync,
+  statSync,
+  WriteStream,
+} from "fs";
 import type { Job } from "bullmq";
 import type { GaxiosResponse } from "gaxios";
 import path from "path";
 import mime from "mime-types";
+import type { FileObject } from "../utilities/interfaces";
+import type { Readable } from "stream";
 
 export default class GDriveService {
   private readonly drive: drive_v3.Drive;
@@ -212,5 +221,71 @@ export default class GDriveService {
     } else {
       return await this.uploadSingleFile(fileName, filePath, fileMimeType);
     }
+  };
+
+  private getGDriveFile = async (
+    fileId: string
+  ): Promise<drive_v3.Schema$File> => {
+    const response = await this.drive.files.get({
+      fileId,
+      fields: "id,name,mimeType,size",
+    });
+    return response.data;
+  };
+
+  private fileSize = (bytes: number): string => {
+    const exp = Math.floor(Math.log(bytes) / Math.log(1024));
+    const result = (bytes / Math.pow(1024, exp)).toFixed(2);
+
+    return (
+      result + " " + (exp === 0 ? "bytes" : "KMGTPEZY".charAt(exp - 1) + "B")
+    );
+  };
+
+  public downloadFile = async (
+    fileId: string,
+    basePath: string
+  ): Promise<FileObject> => {
+    return new Promise(async (resolve, reject) => {
+      const file: drive_v3.Schema$File = await this.getGDriveFile(fileId);
+
+      const downloadPath: string = path.join(basePath, file.name);
+      const response: GaxiosResponse<Readable> = await this.drive.files.get(
+        { fileId, alt: "media" },
+        { responseType: "stream" }
+      );
+
+      const destination: WriteStream = createWriteStream(downloadPath);
+      let progress: number = 0;
+
+      response.data
+        .on("error", (err) => {
+          return reject(err);
+        })
+        .on("close", () => {
+          if (existsSync(downloadPath)) {
+            return resolve({
+              fileName: file.name,
+              filePath: downloadPath,
+              fileMimeType: file.mimeType,
+              fileSize: Number(file.size),
+              directory: false,
+            });
+          } else {
+            return reject(new Error(`${downloadPath} is missing`));
+          }
+        })
+        .on("data", (d) => {
+          progress += d.length;
+          console.log(
+            "\x1b[A\x1b[G\x1b[2K%s: %s - %s of %s",
+            file.name.slice(0, Math.max(0, process.stdout.columns - 32)),
+            Math.round((progress / Number(file.size)) * 100) + "%",
+            this.fileSize(progress),
+            this.fileSize(Number(file.size))
+          );
+        })
+        .pipe(destination);
+    });
   };
 }

@@ -2,6 +2,7 @@ import { Job, Worker } from "bullmq";
 import IORedis from "ioredis";
 import keys from "../keys";
 import MegaToGDriveWorker from "./MegaToGDriveWorker";
+import GDriveToMegaWorker from "./GDriveToMegaWorker";
 
 const connection = new IORedis(keys.REDIS_URL, {
   maxRetriesPerRequest: null,
@@ -11,29 +12,40 @@ const connection = new IORedis(keys.REDIS_URL, {
 const worker: Worker = new Worker(
   keys.MAIN_QUEUE,
   async (job: Job) => {
-    switch (job.data.queue) {
-      case keys.MEGA_TO_GDRIVE_QUEUE: {
-        const megaToGDriveWorker: MegaToGDriveWorker = new MegaToGDriveWorker(
-          job
-        );
-        return await megaToGDriveWorker.run();
+    try {
+      switch (job.data.queue) {
+        case keys.MEGA_TO_GDRIVE_QUEUE: {
+          const megaToGDriveWorker: MegaToGDriveWorker = new MegaToGDriveWorker(
+            job
+          );
+          await megaToGDriveWorker.run();
+          break;
+        }
+        case keys.GDRIVE_TO_MEGA_QUEUE: {
+          const gDriveToMegaWorker: GDriveToMegaWorker = new GDriveToMegaWorker(
+            job
+          );
+          await gDriveToMegaWorker.run();
+          break;
+        }
+        default: {
+          break;
+        }
       }
-      default: {
-        return;
-      }
+    } catch (e) {
+      console.log(e.message);
     }
   },
   { connection }
 );
 
-worker.on("completed", (job: Job) => {
-  console.log(keys.MAIN_QUEUE, job.name, job.data.url, "completed");
-});
-
-worker.on("progress", (job: Job, progress: number) => {
-  console.log(keys.MAIN_QUEUE, job.name, job.data.url, progress);
-});
-
-worker.on("error", (err) => {
-  console.error(keys.MAIN_QUEUE, err);
-});
+worker
+  .on("completed", (job: Job) => {
+    console.log(keys.MAIN_QUEUE, job.name, job.data.url, "completed");
+  })
+  .on("progress", (job: Job, progress: number) => {
+    console.log(keys.MAIN_QUEUE, job.name, job.data.url, progress);
+  })
+  .on("error", (err) => {
+    console.error(keys.MAIN_QUEUE, err);
+  });

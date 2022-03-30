@@ -9,6 +9,7 @@ export default {
   REDIS_URL: process.env.REDIS_URL,
   MAIN_QUEUE: "main-queue",
   MEGA_TO_GDRIVE_QUEUE: "mega-to-gdrive",
+  GDRIVE_TO_MEGA_QUEUE: "gdrive-to-mega",
   GOOGLE_DRIVE_CLIENT_ID: process.env.GOOGLE_DRIVE_CLIENT_ID,
   GOOGLE_DRIVE_CLIENT_SECRET: process.env.GOOGLE_DRIVE_CLIENT_SECRET,
   GOOGLE_DRIVE_REFRESH_TOKEN: process.env.GOOGLE_DRIVE_REFRESH_TOKEN,
