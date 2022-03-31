@@ -4,6 +4,7 @@ import {
   createReadStream,
   createWriteStream,
   existsSync,
+  mkdirSync,
   readdirSync,
   statSync,
   WriteStream,
@@ -124,7 +125,7 @@ export default class GDriveService {
     return shareURL;
   };
 
-  private static getAllFiles = async (
+  private static createDriveFiles = async (
     dirPath: string,
     arrayOfIDs: string[],
     drive: drive_v3.Drive,
@@ -143,7 +144,7 @@ export default class GDriveService {
           },
           fields: "id",
         });
-        arrayOfIDs = await GDriveService.getAllFiles(
+        arrayOfIDs = await GDriveService.createDriveFiles(
           filePath,
           arrayOfIDs,
           drive,
@@ -185,7 +186,7 @@ export default class GDriveService {
       folder = await this.createFolder(folderName);
     }
 
-    const fileIDs: string[] = await GDriveService.getAllFiles(
+    const fileIDs: string[] = await GDriveService.createDriveFiles(
       path.dirname(filePath),
       [],
       this.drive,
@@ -287,5 +288,89 @@ export default class GDriveService {
         })
         .pipe(destination);
     });
+  };
+
+  private static getDriveFiles = async (
+    drive: drive_v3.Drive,
+    parentID: string,
+    dirPath: string
+  ) => {
+    let arrayOfFiles: drive_v3.Schema$File[] = [];
+    let pageToken: string = null;
+    let results: GaxiosResponse<drive_v3.Schema$FileList> =
+      await drive.files.list({
+        pageSize: 1,
+        q: `'${parentID}' in parents`,
+        fields: "nextPageToken, files(id, name, mimeType)",
+        pageToken: pageToken,
+      });
+
+    arrayOfFiles = arrayOfFiles.concat(results.data.files);
+    pageToken = results.data.nextPageToken;
+
+    while (pageToken) {
+      results = await drive.files.list({
+        pageSize: 1,
+        q: `'${parentID}' in parents`,
+        fields: "nextPageToken, files(id, name, mimeType)",
+        pageToken: pageToken,
+      });
+
+      arrayOfFiles = arrayOfFiles.concat(results.data.files);
+      pageToken = results.data.nextPageToken;
+    }
+
+    const promises = arrayOfFiles.map(async (file) => {
+      return new Promise<void>(async (resolve, reject) => {
+        const filePath: string = path.join(dirPath, file.name);
+        if (file.mimeType === "application/vnd.google-apps.folder") {
+          if (!existsSync(filePath)) {
+            mkdirSync(filePath);
+          }
+          await GDriveService.getDriveFiles(drive, file.id, filePath);
+          return resolve();
+        } else {
+          const response: GaxiosResponse<Readable> = await drive.files.get(
+            { fileId: file.id, alt: "media" },
+            { responseType: "stream" }
+          );
+          const destination: WriteStream = createWriteStream(filePath);
+
+          response.data
+            .on("error", (err) => {
+              return reject(err);
+            })
+            .on("close", () => {
+              if (existsSync(filePath)) {
+                return resolve();
+              } else {
+                return reject(new Error(`${filePath} missing`));
+              }
+            })
+            .pipe(destination);
+        }
+      });
+    });
+
+    await Promise.all(promises);
+  };
+
+  public downloadFolder = async (
+    fileId: string,
+    basePath: string
+  ): Promise<FileObject> => {
+    const file: drive_v3.Schema$File = await this.getGDriveFile(fileId);
+    const pathDir: string = path.join(basePath, file.name);
+    if (!existsSync(pathDir)) {
+      mkdirSync(pathDir);
+    }
+    await GDriveService.getDriveFiles(this.drive, fileId, pathDir);
+    return {
+      fileName: file.name,
+      filePath: pathDir,
+      fileMimeType: "inode/directory",
+      fileSize: 0,
+      directory: true,
+    };
   };
 }

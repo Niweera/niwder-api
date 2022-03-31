@@ -2,7 +2,7 @@ import type { Job } from "bullmq";
 import { db } from "../database";
 import type { database } from "firebase-admin";
 import { ServerValue } from "firebase-admin/database";
-import { existsSync, mkdtempSync } from "fs";
+import { existsSync, mkdtempSync, rmSync } from "fs";
 import * as path from "path";
 import * as os from "os";
 import GDriveService from "./GDriveService";
@@ -29,7 +29,7 @@ export default class GDriveToMegaWorker {
       );
 
       const folderRe: RegExp = new RegExp(
-        /^https:\/\/drive\.google\.com\/drive\/folders\/.+$/g
+        /^https:\/\/drive\.google\.com\/drive\/folders\/(.*)\?.*$/g
       );
 
       const gDriveService: GDriveService = new GDriveService(this.job);
@@ -44,7 +44,14 @@ export default class GDriveToMegaWorker {
         await this.job.updateProgress(49);
         return resolve(downloadedFile);
       } else if (folderRe.test(gDriveLink)) {
-        // download folder
+        const fileId: string = gDriveLink.replace(folderRe, "$1");
+
+        const downloadedFile: FileObject = await gDriveService.downloadFolder(
+          fileId,
+          tempDir
+        );
+        await this.job.updateProgress(49);
+        return resolve(downloadedFile);
       } else {
         return reject(new Error("Google Drive link is not understandable"));
       }
@@ -107,6 +114,7 @@ export default class GDriveToMegaWorker {
         if (code === 0) {
           const megaURL: string = await this.getMegaLink(fileName);
           await this.job.updateProgress(98);
+          rmSync(path.dirname(filePath), { recursive: true });
           return resolve(megaURL);
         } else {
           return reject(new Error("Error in uploading to Mega.nz"));
