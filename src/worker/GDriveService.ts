@@ -299,7 +299,6 @@ export default class GDriveService {
     let pageToken: string = null;
     let results: GaxiosResponse<drive_v3.Schema$FileList> =
       await drive.files.list({
-        pageSize: 1,
         q: `'${parentID}' in parents`,
         fields: "nextPageToken, files(id, name, mimeType)",
         pageToken: pageToken,
@@ -310,7 +309,6 @@ export default class GDriveService {
 
     while (pageToken) {
       results = await drive.files.list({
-        pageSize: 1,
         q: `'${parentID}' in parents`,
         fields: "nextPageToken, files(id, name, mimeType)",
         pageToken: pageToken,
