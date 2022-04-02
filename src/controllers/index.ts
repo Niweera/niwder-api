@@ -2,6 +2,7 @@ import { Router, Request, Response } from "express";
 import asyncWrapper from "../utilities/async-wrapper";
 import Service from "../services";
 import { routeAuth } from "../middleware/firebaser";
+import validator from "../middleware/validator";
 
 const router: Router = Router();
 const service: Service = new Service();
@@ -24,7 +25,7 @@ router.get(
  */
 router.post(
   "/api/mega-to-gdrive",
-  routeAuth(),
+  [routeAuth(), validator("Main", "mega")],
   asyncWrapper(async (req: Request, res: Response): Promise<any> => {
     await service.megaToGDrive(req.body.url, req.authenticatedUser.user_id);
     res.sendStatus(204);
@@ -37,7 +38,7 @@ router.post(
  */
 router.post(
   "/api/gdrive-to-mega",
-  routeAuth(),
+  [routeAuth(), validator("Main", "gdrive")],
   asyncWrapper(async (req: Request, res: Response): Promise<any> => {
     await service.gDriveToMega(req.body.url, req.authenticatedUser.user_id);
     res.sendStatus(204);
@@ -50,7 +51,7 @@ router.post(
  */
 router.post(
   "/api/direct-to-gdrive",
-  routeAuth(),
+  [routeAuth(), validator("Main", "url")],
   asyncWrapper(async (req: Request, res: Response): Promise<any> => {
     await service.directToGDrive(req.body.url, req.authenticatedUser.user_id);
     res.sendStatus(204);

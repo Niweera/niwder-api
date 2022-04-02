@@ -390,7 +390,7 @@ export default class GDriveService {
       const tempDir: string = mkdtempSync(path.join(os.tmpdir(), "niwder-tmp"));
 
       const fileRe: RegExp = new RegExp(
-        /https:\/\/drive\.google\.com\/file\/d\/(.*?)\/.*?\?.*$/g
+        /^https:\/\/drive\.google\.com\/file\/d\/(.*?)\/.*?\?.*$/g
       );
 
       const folderRe: RegExp = new RegExp(

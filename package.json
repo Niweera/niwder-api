@@ -50,6 +50,7 @@
     "googleapis": "^98.0.0",
     "helmet": "^5.0.2",
     "ioredis": "^4.28.5",
+    "joi": "^17.6.0",
     "megajs": "^1.0.3",
     "mime-types": "^2.1.35",
     "morgan": "^1.10.0"
