@@ -2,8 +2,6 @@ import type { Job } from "bullmq";
 import { db } from "../database";
 import type { database } from "firebase-admin";
 import { ServerValue } from "firebase-admin/database";
-import { rmSync } from "fs";
-import * as path from "path";
 import GDriveService from "./GDriveService";
 import type { FileObject } from "../utilities/interfaces";
 import FCMService from "./FCMService";
@@ -15,25 +13,6 @@ export default class DirectToGDriveWorker {
   constructor(job: Job) {
     this.job = job;
   }
-
-  private uploadToGDrive = async (
-    fileName: string,
-    filePath: string,
-    fileMimeType: string,
-    directory: boolean
-  ): Promise<string> => {
-    console.log(`now uploading ${filePath} to GDrive`);
-    const gDriveService: GDriveService = new GDriveService(this.job);
-    const shareLink = await gDriveService.uploadFile(
-      fileName,
-      filePath,
-      fileMimeType,
-      directory
-    );
-    await this.job.updateProgress(98);
-    rmSync(path.dirname(filePath), { recursive: true });
-    return shareLink;
-  };
 
   private recordDownloadURL = async (
     driveLink: string,
@@ -68,10 +47,11 @@ export default class DirectToGDriveWorker {
 
   public run = async (): Promise<void> => {
     console.log(`now starting transferring ${this.job.data.url}`);
-    const wgetService: WGETService = new WGETService(this.job);
     await this.job.updateProgress(0);
+    const wgetService: WGETService = new WGETService(this.job);
     const fileObject: FileObject = await wgetService.downloadToDisk();
-    const driveLink: string = await this.uploadToGDrive(
+    const gDriveService: GDriveService = new GDriveService(this.job);
+    const driveLink: string = await gDriveService.uploadToGDrive(
       fileObject.fileName,
       fileObject.filePath,
       fileObject.fileMimeType,

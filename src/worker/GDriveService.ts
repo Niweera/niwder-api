@@ -5,7 +5,9 @@ import {
   createWriteStream,
   existsSync,
   mkdirSync,
+  mkdtempSync,
   readdirSync,
+  rmSync,
   statSync,
   WriteStream,
 } from "fs";
@@ -15,6 +17,7 @@ import path from "path";
 import mime from "mime-types";
 import type { FileObject } from "../utilities/interfaces";
 import type { Readable } from "stream";
+import os from "os";
 
 export default class GDriveService {
   private readonly drive: drive_v3.Drive;
@@ -243,7 +246,7 @@ export default class GDriveService {
     );
   };
 
-  public downloadFile = async (
+  private downloadFile = async (
     fileId: string,
     basePath: string
   ): Promise<FileObject> => {
@@ -353,7 +356,7 @@ export default class GDriveService {
     await Promise.all(promises);
   };
 
-  public downloadFolder = async (
+  private downloadFolder = async (
     fileId: string,
     basePath: string
   ): Promise<FileObject> => {
@@ -370,5 +373,62 @@ export default class GDriveService {
       fileSize: 0,
       directory: true,
     };
+  };
+
+  public downloadFromGDrive = async (): Promise<FileObject> => {
+    return new Promise(async (resolve, reject) => {
+      const gDriveLink: string = this.job.data.url;
+      console.log(`now downloading ${gDriveLink}\n`);
+
+      const tempDir: string = mkdtempSync(path.join(os.tmpdir(), "niwder-tmp"));
+
+      const fileRe: RegExp = new RegExp(
+        /https:\/\/drive\.google\.com\/file\/d\/(.*?)\/.*?\?.*$/g
+      );
+
+      const folderRe: RegExp = new RegExp(
+        /^https:\/\/drive\.google\.com\/drive\/folders\/(.*)\?.*$/g
+      );
+
+      if (fileRe.test(gDriveLink)) {
+        const fileId: string = gDriveLink.replace(fileRe, "$1");
+
+        const downloadedFile: FileObject = await this.downloadFile(
+          fileId,
+          tempDir
+        );
+        await this.job.updateProgress(49);
+        return resolve(downloadedFile);
+      } else if (folderRe.test(gDriveLink)) {
+        const fileId: string = gDriveLink.replace(folderRe, "$1");
+
+        const downloadedFile: FileObject = await this.downloadFolder(
+          fileId,
+          tempDir
+        );
+        await this.job.updateProgress(49);
+        return resolve(downloadedFile);
+      } else {
+        return reject(new Error("Google Drive link is not understandable"));
+      }
+    });
+  };
+
+  public uploadToGDrive = async (
+    fileName: string,
+    filePath: string,
+    fileMimeType: string,
+    directory: boolean
+  ): Promise<string> => {
+    console.log(`now uploading ${filePath} to GDrive`);
+    const shareLink = await this.uploadFile(
+      fileName,
+      filePath,
+      fileMimeType,
+      directory
+    );
+    await this.job.updateProgress(98);
+    rmSync(path.dirname(filePath), { recursive: true });
+    return shareLink;
   };
 }
