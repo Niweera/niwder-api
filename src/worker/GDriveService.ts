@@ -40,10 +40,11 @@ export default class GDriveService {
   private searchFolder = async (
     folderName: string
   ): Promise<drive_v3.Schema$File | null> => {
-    const results = await this.drive.files.list({
-      q: `mimeType='application/vnd.google-apps.folder' and name='${folderName}'`,
-      fields: "files(id, name)",
-    });
+    const results: GaxiosResponse<drive_v3.Schema$FileList> =
+      await this.drive.files.list({
+        q: `mimeType='application/vnd.google-apps.folder' and name='${folderName}'`,
+        fields: "files(id, name)",
+      });
 
     await this.job.updateProgress(50);
     return results.data.files ? results.data.files[0] : null;
@@ -52,13 +53,14 @@ export default class GDriveService {
   private createFolder = async (
     folderName: string
   ): Promise<drive_v3.Schema$File> => {
-    const response = await this.drive.files.create({
-      requestBody: {
-        name: folderName,
-        mimeType: "application/vnd.google-apps.folder",
-      },
-      fields: "id, name",
-    });
+    const response: GaxiosResponse<drive_v3.Schema$File> =
+      await this.drive.files.create({
+        requestBody: {
+          name: folderName,
+          mimeType: "application/vnd.google-apps.folder",
+        },
+        fields: "id, name",
+      });
 
     await this.job.updateProgress(55);
     return response.data;
@@ -110,14 +112,14 @@ export default class GDriveService {
       throw Error(`${filePath} does not exist`);
     }
 
-    const folderName = "Niwder";
-    let folder = await this.searchFolder(folderName);
+    const folderName: string = "Niwder";
+    let folder: drive_v3.Schema$File = await this.searchFolder(folderName);
 
     if (!folder) {
       folder = await this.createFolder(folderName);
     }
 
-    const shareURL = await this.saveFile(
+    const shareURL: string = await this.saveFile(
       fileName,
       filePath,
       fileMimeType,
@@ -134,19 +136,20 @@ export default class GDriveService {
     drive: drive_v3.Drive,
     parentID: string
   ) => {
-    let files = readdirSync(dirPath);
+    let files: string[] = readdirSync(dirPath);
 
-    const promises = files.map(async (file) => {
+    const promises: Promise<void>[] = files.map(async (file) => {
       let filePath: string = `${dirPath}/${file}`;
       if (statSync(filePath).isDirectory()) {
-        const response = await drive.files.create({
-          requestBody: {
-            name: file,
-            parents: [parentID],
-            mimeType: "application/vnd.google-apps.folder",
-          },
-          fields: "id",
-        });
+        const response: GaxiosResponse<drive_v3.Schema$File> =
+          await drive.files.create({
+            requestBody: {
+              name: file,
+              parents: [parentID],
+              mimeType: "application/vnd.google-apps.folder",
+            },
+            fields: "id",
+          });
         arrayOfIDs = await GDriveService.createDriveFiles(
           filePath,
           arrayOfIDs,
@@ -154,7 +157,8 @@ export default class GDriveService {
           response.data.id
         );
       } else {
-        const fileMimeType = mime.lookup(file) || "application/octet-stream";
+        const fileMimeType: string =
+          mime.lookup(file) || "application/octet-stream";
         await drive.files.create({
           requestBody: {
             name: file,
@@ -182,8 +186,10 @@ export default class GDriveService {
       throw Error(`${filePath} does not exist`);
     }
 
-    const folderName = "Niwder";
-    let folder = await this.searchFolder(folderName);
+    const folderName: string = "Niwder";
+    let folder: drive_v3.Schema$File | null = await this.searchFolder(
+      folderName
+    );
 
     if (!folder) {
       folder = await this.createFolder(folderName);
@@ -230,16 +236,17 @@ export default class GDriveService {
   private getGDriveFile = async (
     fileId: string
   ): Promise<drive_v3.Schema$File> => {
-    const response = await this.drive.files.get({
-      fileId,
-      fields: "id,name,mimeType,size",
-    });
+    const response: GaxiosResponse<drive_v3.Schema$File> =
+      await this.drive.files.get({
+        fileId,
+        fields: "id,name,mimeType,size",
+      });
     return response.data;
   };
 
   private fileSize = (bytes: number): string => {
-    const exp = Math.floor(Math.log(bytes) / Math.log(1024));
-    const result = (bytes / Math.pow(1024, exp)).toFixed(2);
+    const exp: number = Math.floor(Math.log(bytes) / Math.log(1024));
+    const result: string = (bytes / Math.pow(1024, exp)).toFixed(2);
 
     return (
       result + " " + (exp === 0 ? "bytes" : "KMGTPEZY".charAt(exp - 1) + "B")
@@ -321,7 +328,7 @@ export default class GDriveService {
       pageToken = results.data.nextPageToken;
     }
 
-    const promises = arrayOfFiles.map(async (file) => {
+    const promises: Promise<void>[] = arrayOfFiles.map(async (file) => {
       return new Promise<void>(async (resolve, reject) => {
         const filePath: string = path.join(dirPath, file.name);
         if (file.mimeType === "application/vnd.google-apps.folder") {
@@ -421,7 +428,7 @@ export default class GDriveService {
     directory: boolean
   ): Promise<string> => {
     console.log(`now uploading ${filePath} to GDrive`);
-    const shareLink = await this.uploadFile(
+    const shareLink: string = await this.uploadFile(
       fileName,
       filePath,
       fileMimeType,

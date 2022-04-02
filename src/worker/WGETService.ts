@@ -2,7 +2,7 @@ import type { FileObject } from "../utilities/interfaces";
 import { mkdtempSync, readdirSync, statSync } from "fs";
 import path from "path";
 import os from "os";
-import { spawn } from "child_process";
+import { ChildProcessWithoutNullStreams, spawn } from "child_process";
 import mime from "mime-types";
 import type { Job } from "bullmq";
 
@@ -19,7 +19,7 @@ export default class WGETService {
       console.log(`now downloading ${url}\n\n`);
 
       const tempDir: string = mkdtempSync(path.join(os.tmpdir(), "niwder-tmp"));
-      const wget = spawn("wget", [
+      const wget: ChildProcessWithoutNullStreams = spawn("wget", [
         `-P`,
         tempDir,
         url,
@@ -42,7 +42,7 @@ export default class WGETService {
       });
 
       wget.on("close", async (code) => {
-        let files = readdirSync(tempDir);
+        let files: string[] = readdirSync(tempDir);
         if (files.length > 0 && code === 0) {
           const filePath: string = path.join(tempDir, files[0]);
           await this.job.updateProgress(49);

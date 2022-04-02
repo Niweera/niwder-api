@@ -1,5 +1,5 @@
 import { existsSync, mkdtempSync, readdirSync, rmSync, statSync } from "fs";
-import { spawn } from "child_process";
+import { ChildProcessWithoutNullStreams, spawn } from "child_process";
 import path from "path";
 import type { Job } from "bullmq";
 import type { FileObject } from "../utilities/interfaces";
@@ -16,7 +16,10 @@ export default class MegaService {
 
   private getMegaLink = async (fileName: string): Promise<string> => {
     return new Promise((resolve, reject) => {
-      const megaCMD = spawn("mega-export", ["-a", `/Niwder/${fileName}`]);
+      const megaCMD: ChildProcessWithoutNullStreams = spawn("mega-export", [
+        "-a",
+        `/Niwder/${fileName}`,
+      ]);
       let megaLink: string = "";
 
       megaCMD.stdout.on("data", (data) => {
@@ -52,7 +55,11 @@ export default class MegaService {
         return reject(new Error(`${filePath} is missing`));
       }
 
-      const megaCMD = spawn("mega-put", ["-c", filePath, "/Niwder/"]);
+      const megaCMD: ChildProcessWithoutNullStreams = spawn("mega-put", [
+        "-c",
+        filePath,
+        "/Niwder/",
+      ]);
 
       megaCMD.stdout.on("data", (data) => {
         console.log(`\x1b[A\x1b[G\x1b[2K${data}`);
@@ -86,16 +93,16 @@ export default class MegaService {
 
       const tempDir: string = mkdtempSync(path.join(os.tmpdir(), "niwder-tmp"));
 
-      const fileRe = new RegExp(
+      const fileRe: RegExp = new RegExp(
         /^https:\/\/mega\.nz\/file\/[a-zA-Z0-9]{0,8}#[a-zA-Z0-9_-]+$/g
       );
-      const folderRe = new RegExp(
+      const folderRe: RegExp = new RegExp(
         /^https:\/\/mega\.nz\/folder\/[a-zA-Z0-9]{0,8}#[a-zA-Z0-9_-]+$/g
       );
-      const folderFolderRe = new RegExp(
+      const folderFolderRe: RegExp = new RegExp(
         /^https:\/\/mega\.nz\/folder\/[a-zA-Z0-9]{0,8}#[a-zA-Z0-9_-]+\/folder\/[a-zA-Z0-9]{0,8}$/g
       );
-      const folderFileRe = new RegExp(
+      const folderFileRe: RegExp = new RegExp(
         /^https:\/\/mega\.nz\/folder\/[a-zA-Z0-9]{0,8}#[a-zA-Z0-9_-]+\/file\/[a-zA-Z0-9]{0,8}$/g
       );
 
@@ -104,7 +111,10 @@ export default class MegaService {
         await file.loadAttributes();
 
         const filePath: string = path.join(tempDir, file.name);
-        const megaCMD = spawn("mega-get", [`"${megaURL}"`, tempDir]);
+        const megaCMD: ChildProcessWithoutNullStreams = spawn("mega-get", [
+          `"${megaURL}"`,
+          tempDir,
+        ]);
 
         megaCMD.stdout.on("data", (data) => {
           console.log(`\x1b[A\x1b[G\x1b[2K${data}`);
@@ -133,7 +143,10 @@ export default class MegaService {
           }
         });
       } else if (folderFolderRe.test(megaURL)) {
-        const megaCMD = spawn("mega-get", [`"${megaURL}"`, tempDir]);
+        const megaCMD: ChildProcessWithoutNullStreams = spawn("mega-get", [
+          `"${megaURL}"`,
+          tempDir,
+        ]);
 
         megaCMD.stdout.on("data", (data) => {
           console.log(`\x1b[A\x1b[G\x1b[2K${data}`);
@@ -148,8 +161,8 @@ export default class MegaService {
         });
 
         megaCMD.on("close", async (code) => {
-          const downloaded = readdirSync(tempDir);
-          const filePath = path.join(tempDir, downloaded[0]);
+          const downloaded: string[] = readdirSync(tempDir);
+          const filePath: string = path.join(tempDir, downloaded[0]);
 
           if (existsSync(filePath) && code === 0) {
             await this.job.updateProgress(49);
@@ -165,7 +178,10 @@ export default class MegaService {
           }
         });
       } else if (folderFileRe.test(megaURL)) {
-        const megaCMD = spawn("mega-get", [`"${megaURL}"`, tempDir]);
+        const megaCMD: ChildProcessWithoutNullStreams = spawn("mega-get", [
+          `"${megaURL}"`,
+          tempDir,
+        ]);
 
         megaCMD.stdout.on("data", (data) => {
           console.log(`\x1b[A\x1b[G\x1b[2K${data}`);
@@ -180,8 +196,8 @@ export default class MegaService {
         });
 
         megaCMD.on("close", async (code) => {
-          const downloaded = readdirSync(tempDir);
-          const filePath = path.join(tempDir, downloaded[0]);
+          const downloaded: string[] = readdirSync(tempDir);
+          const filePath: string = path.join(tempDir, downloaded[0]);
 
           if (existsSync(filePath) && code === 0) {
             await this.job.updateProgress(49);
