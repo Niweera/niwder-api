@@ -94,7 +94,7 @@ export default class GDriveService {
         fields: "webViewLink",
       });
 
-    await this.job.updateProgress(95);
+    await this.job.updateProgress(96);
     return webViewLinkData?.data?.webViewLink;
   };
 

@@ -44,4 +44,17 @@ router.post(
   })
 );
 
+/** @route   POST /api/direct-to-gdrive
+ *  @desc    Convert Direct links to Google Drive URL
+ *  @access  Private
+ */
+router.post(
+  "/api/direct-to-gdrive",
+  routeAuth(),
+  asyncWrapper(async (req: Request, res: Response): Promise<any> => {
+    await service.directToGDrive(req.body.url, req.authenticatedUser.user_id);
+    res.sendStatus(204);
+  })
+);
+
 export default router;
