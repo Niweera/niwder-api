@@ -2,14 +2,12 @@ import type { Job } from "bullmq";
 import { db } from "../database";
 import type { database } from "firebase-admin";
 import { ServerValue } from "firebase-admin/database";
-import { mkdtempSync, readdirSync, rmSync, statSync } from "fs";
+import { rmSync } from "fs";
 import * as path from "path";
-import * as os from "os";
 import GDriveService from "./GDriveService";
 import type { FileObject } from "../utilities/interfaces";
-import mime from "mime-types";
-import { spawn } from "child_process";
 import FCMService from "./FCMService";
+import WGETService from "./WGETService";
 
 export default class DirectToGDriveWorker {
   private readonly job: Job;
@@ -17,55 +15,6 @@ export default class DirectToGDriveWorker {
   constructor(job: Job) {
     this.job = job;
   }
-
-  private downloadToDisk = async (): Promise<FileObject> => {
-    return new Promise(async (resolve, reject) => {
-      const url: string = this.job.data.url;
-      console.log(`now downloading ${url}\n\n`);
-
-      const tempDir: string = mkdtempSync(path.join(os.tmpdir(), "niwder-tmp"));
-      const wget = spawn("wget", [
-        `-P`,
-        tempDir,
-        url,
-        "-q",
-        "--show-progress",
-        "--progress",
-        "bar:force:noscroll",
-      ]);
-
-      wget.stdout.on("data", (data) => {
-        console.log(`\x1b[A\x1b[G\x1b[2K${data}`);
-      });
-
-      wget.stderr.on("data", (data) => {
-        console.log(`\x1b[A\x1b[G\x1b[2K${data}`);
-      });
-
-      wget.on("error", (err) => {
-        reject(err);
-      });
-
-      wget.on("close", async (code) => {
-        let files = readdirSync(tempDir);
-        if (files.length > 0 && code === 0) {
-          const filePath: string = path.join(tempDir, files[0]);
-          await this.job.updateProgress(49);
-          resolve({
-            fileName: files[0],
-            filePath: filePath,
-            fileMimeType: statSync(filePath).isDirectory()
-              ? "inode/directory"
-              : mime.lookup(filePath) || "application/octet-stream",
-            fileSize: statSync(filePath).size,
-            directory: statSync(filePath).isDirectory(),
-          });
-        } else {
-          reject(new Error(`Downloaded file is missing`));
-        }
-      });
-    });
-  };
 
   private uploadToGDrive = async (
     fileName: string,
@@ -119,8 +68,9 @@ export default class DirectToGDriveWorker {
 
   public run = async (): Promise<void> => {
     console.log(`now starting transferring ${this.job.data.url}`);
+    const wgetService: WGETService = new WGETService(this.job);
     await this.job.updateProgress(0);
-    const fileObject: FileObject = await this.downloadToDisk();
+    const fileObject: FileObject = await wgetService.downloadToDisk();
     const driveLink: string = await this.uploadToGDrive(
       fileObject.fileName,
       fileObject.filePath,
