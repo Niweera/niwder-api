@@ -4,6 +4,7 @@ import keys from "../keys";
 import MegaToGDriveWorker from "./MegaToGDriveWorker";
 import GDriveToMegaWorker from "./GDriveToMegaWorker";
 import DirectToGDriveWorker from "./DirectToGDriveWorker";
+import DirectToMegaWorker from "./DirectToMegaWorker";
 
 const connection = new IORedis(keys.REDIS_URL, {
   maxRetriesPerRequest: null,
@@ -33,6 +34,13 @@ const worker: Worker = new Worker(
           const directToGDriveWorker: DirectToGDriveWorker =
             new DirectToGDriveWorker(job);
           await directToGDriveWorker.run();
+          break;
+        }
+        case keys.DIRECT_TO_MEGA_QUEUE: {
+          const directToMegaWorker: DirectToMegaWorker = new DirectToMegaWorker(
+            job
+          );
+          await directToMegaWorker.run();
           break;
         }
         default: {

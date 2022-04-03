@@ -15,7 +15,7 @@ const folderFile =
 const gDriveFoldr =
   "https://drive.google.com/drive/folders/1aqq4tcKu2im0rp7if7j_dlDTQIl4Q2LR?usp=sharing";
 
-const directLink = "https://ipv4.download.thinkbroadband.com/1GB.zip";
+const directLink = "http://ipv4.download.thinkbroadband.com/1GB.zip";
 
 describe("POST /mega-to-gdrive", () => {
   it("Should return HTTP 204", async () => {
@@ -47,6 +47,19 @@ describe("POST /direct-to-gdrive", () => {
   it("Should return HTTP 204", async () => {
     const res: request.Response = await request(app)
       .post("/api/direct-to-gdrive")
+      .send({
+        url: directLink,
+      })
+      .set("Authorization", `Bearer ${await getIDToken()}`);
+
+    expect(res.status).toBe(204);
+  });
+});
+
+describe("POST /direct-to-mega", () => {
+  it("Should return HTTP 204", async () => {
+    const res: request.Response = await request(app)
+      .post("/api/direct-to-mega")
       .send({
         url: directLink,
       })

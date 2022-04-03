@@ -58,4 +58,17 @@ router.post(
   })
 );
 
+/** @route   POST /api/direct-to-mega
+ *  @desc    Convert Direct links to Mega.nz URL
+ *  @access  Private
+ */
+router.post(
+  "/api/direct-to-mega",
+  [routeAuth(), validator("Main", "url")],
+  asyncWrapper(async (req: Request, res: Response): Promise<any> => {
+    await service.directToMega(req.body.url, req.authenticatedUser.user_id);
+    res.sendStatus(204);
+  })
+);
+
 export default router;
