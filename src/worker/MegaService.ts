@@ -6,6 +6,7 @@ import type { FileObject } from "../utilities/interfaces";
 import os from "os";
 import { File as MEGAFile } from "megajs";
 import mime from "mime-types";
+import FirebaseService from "./FirebaseService";
 
 export default class MegaService {
   private readonly job: Job;
@@ -91,6 +92,10 @@ export default class MegaService {
       const megaURL: string = this.job.data.url;
       console.log(`now downloading ${megaURL}`);
 
+      const firebaseService: FirebaseService = new FirebaseService(
+        this.job,
+        "mega-to-gdrive"
+      );
       const tempDir: string = mkdtempSync(path.join(os.tmpdir(), "niwder-tmp"));
 
       const fileRe: RegExp = new RegExp(
@@ -122,6 +127,10 @@ export default class MegaService {
 
         megaCMD.stderr.on("data", (data) => {
           console.log(`\x1b[A\x1b[G\x1b[2K${data}`);
+          firebaseService.recordTransferring({
+            name: file.name,
+            stdout: data.toString(),
+          });
         });
 
         megaCMD.on("error", (err) => {
@@ -154,6 +163,10 @@ export default class MegaService {
 
         megaCMD.stderr.on("data", (data) => {
           console.log(`\x1b[A\x1b[G\x1b[2K${data}`);
+          firebaseService.recordTransferring({
+            name: "tmp.folder",
+            stdout: data.toString(),
+          });
         });
 
         megaCMD.on("error", (err) => {
@@ -189,6 +202,10 @@ export default class MegaService {
 
         megaCMD.stderr.on("data", (data) => {
           console.log(`\x1b[A\x1b[G\x1b[2K${data}`);
+          firebaseService.recordTransferring({
+            name: "tmp.file",
+            stdout: data.toString(),
+          });
         });
 
         megaCMD.on("error", (err) => {

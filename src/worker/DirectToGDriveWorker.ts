@@ -45,8 +45,11 @@ export default class DirectToGDriveWorker {
         ? "inode/directory"
         : fileObject.fileMimeType,
     };
-    const firebaseService: FirebaseService = new FirebaseService(this.job);
-    await firebaseService.recordDownloadURL("direct-to-gdrive", transfersData);
+    const firebaseService: FirebaseService = new FirebaseService(
+      this.job,
+      "direct-to-gdrive"
+    );
+    await firebaseService.recordDownloadURL(transfersData);
     await this.sendFCMNotification(fileObject.fileName, driveLink);
   };
 }

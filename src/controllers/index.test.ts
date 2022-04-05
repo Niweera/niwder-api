@@ -2,13 +2,13 @@ import request from "supertest";
 import { app } from "../server";
 import { getIDToken } from "../middleware/firebaser.test";
 
-//const file =
-//"https://mega.nz/file/1wQXkIyR#mTci1QDs5cjg5-rhxjrYU5QxUbN_OLkuuwyYyWvQIyo";
+const file =
+  "https://mega.nz/file/ghwl1bgA#Sf8sOdGglLmm-oN7L8HrGFCSgaYXeXEeTv59zJVdVLs";
 //const folder = "https://mega.nz/folder/xspkCBpa#a0oa70caa9nvTpufH6bm6g";
 //const folderFolder =
 //"https://mega.nz/folder/xspkCBpa#a0oa70caa9nvTpufH6bm6g/folder/h1pQjY4D";
-const folderFile =
-  "https://mega.nz/folder/xspkCBpa#a0oa70caa9nvTpufH6bm6g/file/txpSSQZZ";
+// const folderFile =
+//   "https://mega.nz/folder/xspkCBpa#a0oa70caa9nvTpufH6bm6g/file/txpSSQZZ";
 
 //const gDriveFile =
 //  "https://drive.google.com/file/d/17uhXkmL2-FvmET_-Y63hB-ExumqzFB4-/view?usp=sharing";
@@ -22,7 +22,7 @@ describe("POST /mega-to-gdrive", () => {
     const res: request.Response = await request(app)
       .post("/api/mega-to-gdrive")
       .send({
-        url: folderFile,
+        url: file,
       })
       .set("Authorization", `Bearer ${await getIDToken()}`);
 

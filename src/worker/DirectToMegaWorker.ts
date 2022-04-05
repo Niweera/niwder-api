@@ -43,8 +43,11 @@ export default class DirectToMegaWorker {
         ? "inode/directory"
         : fileObject.fileMimeType,
     };
-    const firebaseService: FirebaseService = new FirebaseService(this.job);
-    await firebaseService.recordDownloadURL("direct-to-mega", transfersData);
+    const firebaseService: FirebaseService = new FirebaseService(
+      this.job,
+      "direct-to-mega"
+    );
+    await firebaseService.recordDownloadURL(transfersData);
     await this.sendFCMNotification(fileObject.fileName, megaLink);
   };
 }

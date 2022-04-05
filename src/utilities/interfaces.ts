@@ -29,3 +29,8 @@ export type TransfersData = {
   size: number;
   mimeType: string;
 };
+
+export type TransferringData = {
+  name: string;
+  stdout: string;
+};

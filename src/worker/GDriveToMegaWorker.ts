@@ -43,8 +43,11 @@ export default class GDriveToMegaWorker {
         ? "inode/directory"
         : fileObject.fileMimeType,
     };
-    const firebaseService: FirebaseService = new FirebaseService(this.job);
-    await firebaseService.recordDownloadURL("gdrive-to-mega", transfersData);
+    const firebaseService: FirebaseService = new FirebaseService(
+      this.job,
+      "gdrive-to-mega"
+    );
+    await firebaseService.recordDownloadURL(transfersData);
     await this.sendFCMNotification(fileObject.fileName, megaLink);
   };
 }
