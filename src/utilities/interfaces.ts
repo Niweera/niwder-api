@@ -19,3 +19,13 @@ export type Model = {
 export type Validator = {
   [models: string]: Model;
 };
+
+export type TransfersData = {
+  megaLink?: string;
+  gDriveLink?: string;
+  directLink?: string;
+  timestamp: Object;
+  name: string;
+  size: number;
+  mimeType: string;
+};
