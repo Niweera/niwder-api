@@ -3,7 +3,7 @@ import { app } from "../server";
 import { getIDToken } from "../middleware/firebaser.test";
 
 const file =
-  "https://mega.nz/file/ghwl1bgA#Sf8sOdGglLmm-oN7L8HrGFCSgaYXeXEeTv59zJVdVLs";
+  "https://mega.nz/file/o540lZQT#QtGNvAYWNGoX54Q5Bn4xhCNuvQnzMW5q7JhVlwAEuSw";
 //const folder = "https://mega.nz/folder/xspkCBpa#a0oa70caa9nvTpufH6bm6g";
 //const folderFolder =
 //"https://mega.nz/folder/xspkCBpa#a0oa70caa9nvTpufH6bm6g/folder/h1pQjY4D";
@@ -15,7 +15,8 @@ const file =
 const gDriveFoldr =
   "https://drive.google.com/drive/folders/1aqq4tcKu2im0rp7if7j_dlDTQIl4Q2LR?usp=sharing";
 
-const directLink = "http://ipv4.download.thinkbroadband.com/1GB.zip";
+const directLink =
+  "https://github.com/denoland/deno/releases/download/v1.20.4/deno-x86_64-unknown-linux-gnu.zip";
 
 describe("POST /mega-to-gdrive", () => {
   it("Should return HTTP 204", async () => {

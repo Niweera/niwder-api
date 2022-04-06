@@ -32,5 +32,7 @@ export type TransfersData = {
 
 export type TransferringData = {
   name: string;
-  stdout: string;
+  message: string;
+  stdout?: string;
+  percentage?: number;
 };

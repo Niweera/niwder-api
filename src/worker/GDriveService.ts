@@ -18,12 +18,14 @@ import mime from "mime-types";
 import type { FileObject } from "../utilities/interfaces";
 import type { Readable } from "stream";
 import os from "os";
+import FirebaseService from "./FirebaseService";
 
 export default class GDriveService {
   private readonly drive: drive_v3.Drive;
   private readonly job: Job;
+  private readonly dbPath: string;
 
-  constructor(job: Job) {
+  constructor(job: Job, dbPath: string) {
     this.job = job;
     const client: Auth.OAuth2Client = new google.auth.OAuth2(
       keys.GOOGLE_DRIVE_CLIENT_ID,
@@ -35,6 +37,7 @@ export default class GDriveService {
       version: "v3",
       auth: client,
     });
+    this.dbPath = dbPath;
   }
 
   private searchFolder = async (
@@ -72,18 +75,37 @@ export default class GDriveService {
     fileMimeType: string,
     folderId: string
   ): Promise<string> => {
+    let fileSize = statSync(filePath).size;
+
+    const firebaseService: FirebaseService = new FirebaseService(
+      this.job,
+      this.dbPath
+    );
+
     const response: GaxiosResponse<drive_v3.Schema$File> =
-      await this.drive.files.create({
-        requestBody: {
-          name: fileName,
-          mimeType: fileMimeType,
-          parents: [folderId],
+      await this.drive.files.create(
+        {
+          requestBody: {
+            name: fileName,
+            mimeType: fileMimeType,
+            parents: [folderId],
+          },
+          media: {
+            mimeType: fileMimeType,
+            body: createReadStream(filePath),
+          },
         },
-        media: {
-          mimeType: fileMimeType,
-          body: createReadStream(filePath),
-        },
-      });
+        {
+          onUploadProgress: (evt) => {
+            const progress = (evt.bytesRead / fileSize) * 100;
+            firebaseService.recordTransferring({
+              name: fileName,
+              message: `Transferring to Google Drive`,
+              percentage: Math.round(progress),
+            });
+          },
+        }
+      );
 
     await this.drive.permissions.create({
       fileId: response?.data?.id,
@@ -134,12 +156,14 @@ export default class GDriveService {
     dirPath: string,
     arrayOfIDs: string[],
     drive: drive_v3.Drive,
-    parentID: string
+    parentID: string,
+    firebaseService: FirebaseService
   ) => {
     let files: string[] = readdirSync(dirPath);
 
     const promises: Promise<void>[] = files.map(async (file) => {
       let filePath: string = `${dirPath}/${file}`;
+      let fileSize = statSync(path.join(dirPath, file)).size;
       if (statSync(filePath).isDirectory()) {
         const response: GaxiosResponse<drive_v3.Schema$File> =
           await drive.files.create({
@@ -154,22 +178,35 @@ export default class GDriveService {
           filePath,
           arrayOfIDs,
           drive,
-          response.data.id
+          response.data.id,
+          firebaseService
         );
       } else {
         const fileMimeType: string =
           mime.lookup(file) || "application/octet-stream";
-        await drive.files.create({
-          requestBody: {
-            name: file,
-            mimeType: fileMimeType,
-            parents: [parentID],
+        await drive.files.create(
+          {
+            requestBody: {
+              name: file,
+              mimeType: fileMimeType,
+              parents: [parentID],
+            },
+            media: {
+              mimeType: fileMimeType,
+              body: createReadStream(path.join(dirPath, file)),
+            },
           },
-          media: {
-            mimeType: fileMimeType,
-            body: createReadStream(path.join(dirPath, file)),
-          },
-        });
+          {
+            onUploadProgress: (evt) => {
+              const progress = (evt.bytesRead / fileSize) * 100;
+              firebaseService.recordTransferring({
+                name: file,
+                message: `Transferring to Google Drive`,
+                percentage: Math.round(progress),
+              });
+            },
+          }
+        );
         arrayOfIDs.push(parentID);
       }
     });
@@ -195,11 +232,17 @@ export default class GDriveService {
       folder = await this.createFolder(folderName);
     }
 
+    const firebaseService: FirebaseService = new FirebaseService(
+      this.job,
+      this.dbPath
+    );
+
     const fileIDs: string[] = await GDriveService.createDriveFiles(
       path.dirname(filePath),
       [],
       this.drive,
-      folder.id
+      folder.id,
+      firebaseService
     );
 
     await this.drive.permissions.create({

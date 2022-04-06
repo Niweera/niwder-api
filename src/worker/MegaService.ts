@@ -129,6 +129,7 @@ export default class MegaService {
           console.log(`\x1b[A\x1b[G\x1b[2K${data}`);
           firebaseService.recordTransferring({
             name: file.name,
+            message: `Transferring from Mega.nz`,
             stdout: data.toString(),
           });
         });
@@ -165,6 +166,7 @@ export default class MegaService {
           console.log(`\x1b[A\x1b[G\x1b[2K${data}`);
           firebaseService.recordTransferring({
             name: "tmp.folder",
+            message: `Transferring from Mega.nz`,
             stdout: data.toString(),
           });
         });
@@ -204,6 +206,7 @@ export default class MegaService {
           console.log(`\x1b[A\x1b[G\x1b[2K${data}`);
           firebaseService.recordTransferring({
             name: "tmp.file",
+            message: `Transferring from Mega.nz`,
             stdout: data.toString(),
           });
         });

@@ -26,7 +26,10 @@ export default class GDriveToMegaWorker {
   public run = async (): Promise<void> => {
     console.log(`now starting transferring ${this.job.data.url}`);
     await this.job.updateProgress(0);
-    const gDriveService: GDriveService = new GDriveService(this.job);
+    const gDriveService: GDriveService = new GDriveService(
+      this.job,
+      "gdrive-to-mega"
+    );
     const fileObject: FileObject = await gDriveService.downloadFromGDrive();
     const megaService: MegaService = new MegaService(this.job);
     const megaLink: string = await megaService.uploadToMega(
