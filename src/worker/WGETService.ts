@@ -5,18 +5,26 @@ import os from "os";
 import { ChildProcessWithoutNullStreams, spawn } from "child_process";
 import mime from "mime-types";
 import type { Job } from "bullmq";
+import FirebaseService from "./FirebaseService";
 
 export default class WGETService {
   private readonly job: Job;
+  private readonly dbPath: string;
 
-  constructor(job: Job) {
+  constructor(job: Job, dbPath: string) {
     this.job = job;
+    this.dbPath = dbPath;
   }
 
   public downloadToDisk = async (): Promise<FileObject> => {
     return new Promise(async (resolve, reject) => {
       const url: string = this.job.data.url;
       console.log(`now downloading ${url}\n\n`);
+
+      const firebaseService: FirebaseService = new FirebaseService(
+        this.job,
+        this.dbPath
+      );
 
       const tempDir: string = mkdtempSync(path.join(os.tmpdir(), "niwder-tmp"));
       const wget: ChildProcessWithoutNullStreams = spawn("wget", [
@@ -35,6 +43,11 @@ export default class WGETService {
 
       wget.stderr.on("data", (data) => {
         console.log(`\x1b[A\x1b[G\x1b[2K${data}`);
+        firebaseService.recordTransferring({
+          name: "tmp.file",
+          message: `Transferring from source`,
+          stdout: data.toString(),
+        });
       });
 
       wget.on("error", (err) => {

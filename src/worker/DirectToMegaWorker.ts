@@ -26,7 +26,10 @@ export default class DirectToMegaWorker {
   public run = async (): Promise<void> => {
     console.log(`now starting transferring ${this.job.data.url}`);
     await this.job.updateProgress(0);
-    const wgetService: WGETService = new WGETService(this.job);
+    const wgetService: WGETService = new WGETService(
+      this.job,
+      "direct-to-mega"
+    );
     const fileObject: FileObject = await wgetService.downloadToDisk();
     const megaService: MegaService = new MegaService(
       this.job,
