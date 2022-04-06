@@ -312,6 +312,11 @@ export default class GDriveService {
       const destination: WriteStream = createWriteStream(downloadPath);
       let progress: number = 0;
 
+      const firebaseService: FirebaseService = new FirebaseService(
+        this.job,
+        this.dbPath
+      );
+
       response.data
         .on("error", (err) => {
           return reject(err);
@@ -338,6 +343,12 @@ export default class GDriveService {
             this.fileSize(progress),
             this.fileSize(Number(file.size))
           );
+
+          firebaseService.recordTransferring({
+            name: file.name,
+            message: `Transferring from Google Drive`,
+            percentage: Math.round((progress / Number(file.size)) * 100),
+          });
         })
         .pipe(destination);
     });
@@ -346,14 +357,15 @@ export default class GDriveService {
   private static getDriveFiles = async (
     drive: drive_v3.Drive,
     parentID: string,
-    dirPath: string
+    dirPath: string,
+    firebaseService: FirebaseService
   ) => {
     let arrayOfFiles: drive_v3.Schema$File[] = [];
     let pageToken: string = null;
     let results: GaxiosResponse<drive_v3.Schema$FileList> =
       await drive.files.list({
         q: `'${parentID}' in parents`,
-        fields: "nextPageToken, files(id, name, mimeType)",
+        fields: "nextPageToken, files(id, name, mimeType, size)",
         pageToken: pageToken,
       });
 
@@ -363,7 +375,7 @@ export default class GDriveService {
     while (pageToken) {
       results = await drive.files.list({
         q: `'${parentID}' in parents`,
-        fields: "nextPageToken, files(id, name, mimeType)",
+        fields: "nextPageToken, files(id, name, mimeType, size)",
         pageToken: pageToken,
       });
 
@@ -378,7 +390,12 @@ export default class GDriveService {
           if (!existsSync(filePath)) {
             mkdirSync(filePath);
           }
-          await GDriveService.getDriveFiles(drive, file.id, filePath);
+          await GDriveService.getDriveFiles(
+            drive,
+            file.id,
+            filePath,
+            firebaseService
+          );
           return resolve();
         } else {
           const response: GaxiosResponse<Readable> = await drive.files.get(
@@ -386,6 +403,7 @@ export default class GDriveService {
             { responseType: "stream" }
           );
           const destination: WriteStream = createWriteStream(filePath);
+          let progress: number = 0;
 
           response.data
             .on("error", (err) => {
@@ -397,6 +415,14 @@ export default class GDriveService {
               } else {
                 return reject(new Error(`${filePath} missing`));
               }
+            })
+            .on("data", (d) => {
+              progress += d.length;
+              firebaseService.recordTransferring({
+                name: file.name,
+                message: `Transferring from Google Drive`,
+                percentage: Math.round((progress / Number(file.size)) * 100),
+              });
             })
             .pipe(destination);
         }
@@ -415,7 +441,17 @@ export default class GDriveService {
     if (!existsSync(pathDir)) {
       mkdirSync(pathDir);
     }
-    await GDriveService.getDriveFiles(this.drive, fileId, pathDir);
+
+    const firebaseService: FirebaseService = new FirebaseService(
+      this.job,
+      this.dbPath
+    );
+    await GDriveService.getDriveFiles(
+      this.drive,
+      fileId,
+      pathDir,
+      firebaseService
+    );
     return {
       fileName: file.name,
       filePath: pathDir,
