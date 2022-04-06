@@ -34,7 +34,7 @@ export default class WGETService {
         "-q",
         "--show-progress",
         "--progress",
-        "bar:force:noscroll",
+        "bar:force",
       ]);
 
       wget.stdout.on("data", (data) => {
