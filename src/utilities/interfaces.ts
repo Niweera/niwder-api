@@ -36,3 +36,9 @@ export type TransferringData = {
   stdout?: string;
   percentage?: number;
 };
+
+export type ExtendedParsedQs = {
+  code?: string;
+  uid?: string;
+  state?: string;
+};

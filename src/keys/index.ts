@@ -15,5 +15,6 @@ export default {
   GOOGLE_DRIVE_CLIENT_ID: process.env.GOOGLE_DRIVE_CLIENT_ID,
   GOOGLE_DRIVE_CLIENT_SECRET: process.env.GOOGLE_DRIVE_CLIENT_SECRET,
   GOOGLE_DRIVE_REFRESH_TOKEN: process.env.GOOGLE_DRIVE_REFRESH_TOKEN,
-  GOOGLE_DRIVE_REDIRECT_URI: "https://developers.google.com/oauthplayground",
+  GOOGLE_DRIVE_REDIRECT_URI: "https://niwder-api.niweera.gq/api/oauth/callback",
+  OAUTH_REDIRECT_URL: "https://niwder.niweera.gq/transfers",
 };

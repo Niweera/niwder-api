@@ -21,3 +21,18 @@ describe("Obtain a custom Firebase Token", () => {
     console.log(await getIDToken());
   });
 });
+
+describe("Obtain a custom Firebase Token2", () => {
+  it("Should return a custom Firebase Token", async () => {
+    const response: AxiosResponse = await axios.get(
+      `https://niwder-api.niweera.gq/api/oauth`,
+      {
+        headers: {
+          Authorization: `Bearer ${await getIDToken()}`,
+        },
+      }
+    );
+
+    console.log(response.data);
+  });
+});
