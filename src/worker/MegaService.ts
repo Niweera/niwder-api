@@ -7,6 +7,7 @@ import os from "os";
 import { File as MEGAFile } from "megajs";
 import mime from "mime-types";
 import FirebaseService from "./FirebaseService";
+import keys from "../keys";
 
 export default class MegaService {
   private readonly job: Job;
@@ -21,7 +22,7 @@ export default class MegaService {
     return new Promise((resolve, reject) => {
       const megaCMD: ChildProcessWithoutNullStreams = spawn("mega-export", [
         "-a",
-        `/Niwder/${fileName}`,
+        `/${keys.MEGA_FOLDER_NAME}/${fileName}`,
       ]);
       let megaLink: string = "";
 
@@ -66,7 +67,7 @@ export default class MegaService {
       const megaCMD: ChildProcessWithoutNullStreams = spawn("mega-put", [
         "-c",
         filePath,
-        "/Niwder/",
+        `/${keys.MEGA_FOLDER_NAME}/`,
       ]);
 
       megaCMD.stdout.on("data", (data) => {

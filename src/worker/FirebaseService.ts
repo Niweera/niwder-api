@@ -1,6 +1,7 @@
 import type { Job } from "bullmq";
 import { db } from "../database";
 import type { TransfersData, TransferringData } from "../utilities/interfaces";
+import type { DataSnapshot } from "@firebase/database-types";
 
 export default class FirebaseService {
   private readonly job: Job;
@@ -35,5 +36,14 @@ export default class FirebaseService {
       .child(this.dbPath)
       .child(this.job.id)
       .set(data);
+  };
+
+  public getRefreshToken = async (): Promise<string> => {
+    const response: DataSnapshot = await db
+      .ref("tokens")
+      .child(this.job.data.uid)
+      .child("refreshToken")
+      .once("value");
+    return response.val();
   };
 }

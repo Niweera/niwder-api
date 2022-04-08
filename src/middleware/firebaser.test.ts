@@ -22,8 +22,8 @@ describe("Obtain a custom Firebase Token", () => {
   });
 });
 
-describe("Obtain a custom Firebase Token2", () => {
-  it("Should return a custom Firebase Token", async () => {
+describe("Obtain a Google Drive API refresh token", () => {
+  it("Should return an oAuth url", async () => {
     const response: AxiosResponse = await axios.get(
       `https://niwder-api.niweera.gq/api/oauth`,
       {

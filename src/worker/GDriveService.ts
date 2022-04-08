@@ -25,20 +25,39 @@ export default class GDriveService {
   private readonly job: Job;
   private readonly dbPath: string;
 
-  constructor(job: Job, dbPath: string) {
+  constructor(job: Job, dbPath: string, drive: drive_v3.Drive) {
     this.job = job;
+    this.dbPath = dbPath;
+    this.drive = drive;
+  }
+
+  public static build = async (
+    job: Job,
+    dbPath: string
+  ): Promise<GDriveService> => {
+    const firebaseService: FirebaseService = new FirebaseService(job, dbPath);
+
+    const refreshToken: string = await firebaseService.getRefreshToken();
+
     const client: Auth.OAuth2Client = new google.auth.OAuth2(
       keys.GOOGLE_DRIVE_CLIENT_ID,
       keys.GOOGLE_DRIVE_CLIENT_SECRET,
       keys.GOOGLE_DRIVE_REDIRECT_URI
     );
-    client.setCredentials({ refresh_token: keys.GOOGLE_DRIVE_REFRESH_TOKEN });
-    this.drive = google.drive({
-      version: "v3",
-      auth: client,
-    });
-    this.dbPath = dbPath;
-  }
+
+    if (refreshToken) {
+      client.setCredentials({ refresh_token: refreshToken });
+
+      const drive = google.drive({
+        version: "v3",
+        auth: client,
+      });
+
+      return new GDriveService(job, dbPath, drive);
+    } else {
+      throw new Error("refreshToken is missing");
+    }
+  };
 
   private searchFolder = async (
     folderName: string
@@ -134,7 +153,7 @@ export default class GDriveService {
       throw Error(`${filePath} does not exist`);
     }
 
-    const folderName: string = "Niwder";
+    const folderName: string = keys.GDRIVE_FOLDER_NAME;
     let folder: drive_v3.Schema$File = await this.searchFolder(folderName);
 
     if (!folder) {
@@ -223,7 +242,7 @@ export default class GDriveService {
       throw Error(`${filePath} does not exist`);
     }
 
-    const folderName: string = "Niwder";
+    const folderName: string = keys.GDRIVE_FOLDER_NAME;
     let folder: drive_v3.Schema$File | null = await this.searchFolder(
       folderName
     );

@@ -39,6 +39,6 @@ export type TransferringData = {
 
 export type ExtendedParsedQs = {
   code?: string;
-  uid?: string;
+  error?: string;
   state?: string;
 };

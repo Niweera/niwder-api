@@ -31,7 +31,7 @@ export default class MegaToGDriveWorker {
       "mega-to-gdrive"
     );
     const fileObject: FileObject = await megaService.downloadFromMega();
-    const gDriveService: GDriveService = new GDriveService(
+    const gDriveService: GDriveService = await GDriveService.build(
       this.job,
       "mega-to-gdrive"
     );

@@ -90,6 +90,21 @@ router.get(
   })
 );
 
+/** @route   DELETE /api/oauth
+ *  @desc    Revoke authorization
+ *  @access  Private
+ */
+router.delete(
+  "/api/oauth",
+  [routeAuth()],
+  asyncWrapper(async (req: Request, res: Response): Promise<any> => {
+    const url: string = await oAuthService.revokeAuthorization(
+      req.authenticatedUser.user_id
+    );
+    res.send({ url });
+  })
+);
+
 /** @route   GET /api/oauth/callback
  *  @desc    OAuth2 Callback
  *  @access  Public
@@ -103,7 +118,8 @@ oAuthController.get(
     ): Promise<any> => {
       const url: string = await oAuthService.handleCallback(
         req.query.code,
-        req.query.state
+        req.query.state,
+        req.query.error
       );
       res.redirect(302, url);
     }

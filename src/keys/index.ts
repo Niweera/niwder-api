@@ -17,4 +17,6 @@ export default {
   GOOGLE_DRIVE_REFRESH_TOKEN: process.env.GOOGLE_DRIVE_REFRESH_TOKEN,
   GOOGLE_DRIVE_REDIRECT_URI: "https://niwder-api.niweera.gq/api/oauth/callback",
   OAUTH_REDIRECT_URL: "https://niwder.niweera.gq/transfers",
+  GDRIVE_FOLDER_NAME: "Niwder",
+  MEGA_FOLDER_NAME: "Niwder",
 };

@@ -30,10 +30,22 @@ export default class OAuthService {
       access_type: "offline",
       scope: scopes,
       state: uid,
+      prompt: "consent",
     });
   };
 
-  handleCallback = async (code: string, uid: string): Promise<string> => {
+  revokeAuthorization = async (uid: string): Promise<string> => {
+    await this.firebaseService.revokeRefreshToken(uid);
+    return "https://myaccount.google.com/u/0/permissions?pageId=none";
+  };
+
+  handleCallback = async (
+    code: string,
+    uid: string,
+    error: string
+  ): Promise<string> => {
+    if (error) return `${keys.OAUTH_REDIRECT_URL}?error=${error}`;
+
     if (!code || !uid) throw new AccessDeniedError("Access Denied");
 
     const isRequesting = await this.firebaseService.checkForRequesting(uid);
