@@ -29,4 +29,12 @@ export default class FirebaseService {
       .once("value");
     return response.val();
   };
+
+  public static checkUserExists = async (uid: string): Promise<boolean> => {
+    const response: DataSnapshot = await db
+      .ref("users")
+      .child(uid)
+      .once("value");
+    return response.exists();
+  };
 }
