@@ -64,6 +64,8 @@ export default class MegaService {
         this.dbPath
       );
 
+      const percentageRe: RegExp = new RegExp(/.*:\s*([0-9]*\.[0-9]*)\s*.*/g);
+
       const megaCMD: ChildProcessWithoutNullStreams = spawn("mega-put", [
         "-c",
         filePath,
@@ -74,13 +76,16 @@ export default class MegaService {
         console.log(`\x1b[A\x1b[G\x1b[2K${data}`);
       });
 
-      megaCMD.stderr.on("data", (data) => {
+      megaCMD.stderr.on("data", async (data) => {
         console.log(`\x1b[A\x1b[G\x1b[2K${data}`);
-        firebaseService.recordTransferring({
-          name: fileName,
-          message: `Transferring to Mega.nz`,
-          stdout: data.toString(),
-        });
+        const percentage: string = data.toString().replace(percentageRe, "$1");
+        if (Boolean(parseInt(percentage))) {
+          await firebaseService.recordTransferring({
+            name: fileName,
+            message: `Transferring to Mega.nz`,
+            percentage: parseInt(percentage),
+          });
+        }
       });
 
       megaCMD.on("error", (err) => {
@@ -124,6 +129,8 @@ export default class MegaService {
         /^https:\/\/mega\.nz\/folder\/[a-zA-Z0-9]{0,8}#[a-zA-Z0-9_-]+\/file\/[a-zA-Z0-9]{0,8}$/g
       );
 
+      const percentageRe: RegExp = new RegExp(/.*:\s*([0-9]*\.[0-9]*)\s*.*/g);
+
       if (fileRe.test(megaURL) || folderRe.test(megaURL)) {
         const file: MEGAFile = MEGAFile.fromURL(megaURL);
         await file.loadAttributes();
@@ -138,13 +145,18 @@ export default class MegaService {
           console.log(`\x1b[A\x1b[G\x1b[2K${data}`);
         });
 
-        megaCMD.stderr.on("data", (data) => {
+        megaCMD.stderr.on("data", async (data) => {
           console.log(`\x1b[A\x1b[G\x1b[2K${data}`);
-          firebaseService.recordTransferring({
-            name: file.name,
-            message: `Transferring from Mega.nz`,
-            stdout: data.toString(),
-          });
+          const percentage: string = data
+            .toString()
+            .replace(percentageRe, "$1");
+          if (Boolean(parseInt(percentage))) {
+            await firebaseService.recordTransferring({
+              name: file.name,
+              message: `Transferring from Mega.nz`,
+              percentage: parseInt(percentage),
+            });
+          }
         });
 
         megaCMD.on("error", (err) => {
@@ -175,13 +187,18 @@ export default class MegaService {
           console.log(`\x1b[A\x1b[G\x1b[2K${data}`);
         });
 
-        megaCMD.stderr.on("data", (data) => {
+        megaCMD.stderr.on("data", async (data) => {
           console.log(`\x1b[A\x1b[G\x1b[2K${data}`);
-          firebaseService.recordTransferring({
-            name: "tmp.folder",
-            message: `Transferring from Mega.nz`,
-            stdout: data.toString(),
-          });
+          const percentage: string = data
+            .toString()
+            .replace(percentageRe, "$1");
+          if (Boolean(parseInt(percentage))) {
+            await firebaseService.recordTransferring({
+              name: "tmp.folder",
+              message: `Transferring from Mega.nz`,
+              percentage: parseInt(percentage),
+            });
+          }
         });
 
         megaCMD.on("error", (err) => {
@@ -215,12 +232,15 @@ export default class MegaService {
           console.log(`\x1b[A\x1b[G\x1b[2K${data}`);
         });
 
-        megaCMD.stderr.on("data", (data) => {
+        megaCMD.stderr.on("data", async (data) => {
           console.log(`\x1b[A\x1b[G\x1b[2K${data}`);
-          firebaseService.recordTransferring({
+          const percentage: string = data
+            .toString()
+            .replace(percentageRe, "$1");
+          await firebaseService.recordTransferring({
             name: "tmp.file",
             message: `Transferring from Mega.nz`,
-            stdout: data.toString(),
+            percentage: parseInt(percentage),
           });
         });
 

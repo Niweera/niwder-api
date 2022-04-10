@@ -33,8 +33,7 @@ export type TransfersData = {
 export type TransferringData = {
   name: string;
   message: string;
-  stdout?: string;
-  percentage?: number;
+  percentage: number;
 };
 
 export type ExtendedParsedQs = {

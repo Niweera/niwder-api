@@ -115,9 +115,9 @@ export default class GDriveService {
           },
         },
         {
-          onUploadProgress: (evt) => {
+          onUploadProgress: async (evt) => {
             const progress = (evt.bytesRead / fileSize) * 100;
-            firebaseService.recordTransferring({
+            await firebaseService.recordTransferring({
               name: fileName,
               message: `Transferring to Google Drive`,
               percentage: Math.round(progress),
@@ -216,9 +216,9 @@ export default class GDriveService {
             },
           },
           {
-            onUploadProgress: (evt) => {
+            onUploadProgress: async (evt) => {
               const progress = (evt.bytesRead / fileSize) * 100;
-              firebaseService.recordTransferring({
+              await firebaseService.recordTransferring({
                 name: file,
                 message: `Transferring to Google Drive`,
                 percentage: Math.round(progress),
@@ -353,7 +353,7 @@ export default class GDriveService {
             return reject(new Error(`${downloadPath} is missing`));
           }
         })
-        .on("data", (d) => {
+        .on("data", async (d) => {
           progress += d.length;
           console.log(
             "\x1b[A\x1b[G\x1b[2K%s: %s - %s of %s",
@@ -363,7 +363,7 @@ export default class GDriveService {
             this.fileSize(Number(file.size))
           );
 
-          firebaseService.recordTransferring({
+          await firebaseService.recordTransferring({
             name: file.name,
             message: `Transferring from Google Drive`,
             percentage: Math.round((progress / Number(file.size)) * 100),
@@ -435,9 +435,9 @@ export default class GDriveService {
                 return reject(new Error(`${filePath} missing`));
               }
             })
-            .on("data", (d) => {
+            .on("data", async (d) => {
               progress += d.length;
-              firebaseService.recordTransferring({
+              await firebaseService.recordTransferring({
                 name: file.name,
                 message: `Transferring from Google Drive`,
                 percentage: Math.round((progress / Number(file.size)) * 100),

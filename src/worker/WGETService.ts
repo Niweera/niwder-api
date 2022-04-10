@@ -26,6 +26,8 @@ export default class WGETService {
         this.dbPath
       );
 
+      const percentageRe: RegExp = new RegExp(/.*\s(\d*)%.*/g);
+
       const tempDir: string = mkdtempSync(path.join(os.tmpdir(), "niwder-tmp"));
       const wget: ChildProcessWithoutNullStreams = spawn("wget", [
         `-P`,
@@ -41,13 +43,16 @@ export default class WGETService {
         console.log(`\x1b[A\x1b[G\x1b[2K${data}`);
       });
 
-      wget.stderr.on("data", (data) => {
+      wget.stderr.on("data", async (data) => {
         console.log(`\x1b[A\x1b[G\x1b[2K${data}`);
-        firebaseService.recordTransferring({
-          name: "tmp.file",
-          message: `Transferring from source`,
-          stdout: data.toString(),
-        });
+        const percentage: string = data.toString().replace(percentageRe, "$1");
+        if (Boolean(parseInt(percentage))) {
+          await firebaseService.recordTransferring({
+            name: "tmp.file",
+            message: `Transferring from source`,
+            percentage: parseInt(percentage),
+          });
+        }
       });
 
       wget.on("error", (err) => {
