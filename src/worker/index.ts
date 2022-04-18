@@ -54,13 +54,39 @@ const worker: Worker = new Worker(
   { connection }
 );
 
-worker
-  .on("completed", (job: Job) => {
-    console.log(keys.MAIN_QUEUE, job.name, job.data.url, "completed");
-  })
-  .on("progress", (job: Job, progress: number) => {
-    console.log(keys.MAIN_QUEUE, job.name, job.data.url, progress);
-  })
-  .on("error", (err) => {
-    console.error(keys.MAIN_QUEUE, err);
-  });
+worker.on("active", (job: Job) => {
+  console.log(keys.MAIN_QUEUE, job.name, job.data.url, "active");
+});
+
+worker.on("closed", () => {
+  console.log(keys.MAIN_QUEUE, "closed");
+});
+
+worker.on("closing", () => {
+  console.log(keys.MAIN_QUEUE, "closing");
+});
+
+worker.on("completed", (job: Job) => {
+  console.log(keys.MAIN_QUEUE, job.name, job.data.url, "completed");
+});
+
+worker.on("drained", () => {
+  console.log(keys.MAIN_QUEUE, "drained");
+});
+
+worker.on("error", (err: Error) => {
+  console.error(keys.MAIN_QUEUE, err);
+});
+
+worker.on("failed", (job: Job, error: Error) => {
+  console.log(keys.MAIN_QUEUE, job.name, job.data.url, error);
+});
+
+worker.on("progress", (job: Job, progress: number) => {
+  console.log(keys.MAIN_QUEUE, job.name, job.data.url, progress);
+});
+
+process.on("SIGINT", async () => {
+  await worker.close();
+  process.exit(0);
+});

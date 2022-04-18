@@ -320,56 +320,60 @@ export default class GDriveService {
     basePath: string
   ): Promise<FileObject> => {
     return new Promise(async (resolve, reject) => {
-      const file: drive_v3.Schema$File = await this.getGDriveFile(fileId);
+      try {
+        const file: drive_v3.Schema$File = await this.getGDriveFile(fileId);
 
-      const downloadPath: string = path.join(basePath, file.name);
-      const response: GaxiosResponse<Readable> = await this.drive.files.get(
-        { fileId, alt: "media" },
-        { responseType: "stream" }
-      );
+        const downloadPath: string = path.join(basePath, file.name);
+        const response: GaxiosResponse<Readable> = await this.drive.files.get(
+          { fileId, alt: "media" },
+          { responseType: "stream" }
+        );
 
-      const destination: WriteStream = createWriteStream(downloadPath);
-      let progress: number = 0;
+        const destination: WriteStream = createWriteStream(downloadPath);
+        let progress: number = 0;
 
-      const firebaseService: FirebaseService = new FirebaseService(
-        this.job,
-        this.dbPath
-      );
+        const firebaseService: FirebaseService = new FirebaseService(
+          this.job,
+          this.dbPath
+        );
 
-      response.data
-        .on("error", (err) => {
-          return reject(err);
-        })
-        .on("close", () => {
-          if (existsSync(downloadPath)) {
-            return resolve({
-              fileName: file.name,
-              filePath: downloadPath,
-              fileMimeType: file.mimeType,
-              fileSize: Number(file.size),
-              directory: false,
+        response.data
+          .on("error", (err) => {
+            return reject(err);
+          })
+          .on("close", () => {
+            if (existsSync(downloadPath)) {
+              return resolve({
+                fileName: file.name,
+                filePath: downloadPath,
+                fileMimeType: file.mimeType,
+                fileSize: Number(file.size),
+                directory: false,
+              });
+            } else {
+              return reject(new Error(`${downloadPath} is missing`));
+            }
+          })
+          .on("data", async (d) => {
+            progress += d.length;
+            console.log(
+              "\x1b[A\x1b[G\x1b[2K%s: %s - %s of %s",
+              file.name.slice(0, Math.max(0, process.stdout.columns - 32)),
+              Math.round((progress / Number(file.size)) * 100) + "%",
+              this.fileSize(progress),
+              this.fileSize(Number(file.size))
+            );
+
+            await firebaseService.recordTransferring({
+              name: file.name,
+              message: `Transferring from Google Drive`,
+              percentage: Math.round((progress / Number(file.size)) * 100),
             });
-          } else {
-            return reject(new Error(`${downloadPath} is missing`));
-          }
-        })
-        .on("data", async (d) => {
-          progress += d.length;
-          console.log(
-            "\x1b[A\x1b[G\x1b[2K%s: %s - %s of %s",
-            file.name.slice(0, Math.max(0, process.stdout.columns - 32)),
-            Math.round((progress / Number(file.size)) * 100) + "%",
-            this.fileSize(progress),
-            this.fileSize(Number(file.size))
-          );
-
-          await firebaseService.recordTransferring({
-            name: file.name,
-            message: `Transferring from Google Drive`,
-            percentage: Math.round((progress / Number(file.size)) * 100),
-          });
-        })
-        .pipe(destination);
+          })
+          .pipe(destination);
+      } catch (e) {
+        reject(e);
+      }
     });
   };
 
@@ -482,39 +486,45 @@ export default class GDriveService {
 
   public downloadFromGDrive = async (): Promise<FileObject> => {
     return new Promise(async (resolve, reject) => {
-      const gDriveLink: string = this.job.data.url;
-      console.log(`now downloading ${gDriveLink}\n`);
+      try {
+        const gDriveLink: string = this.job.data.url;
+        console.log(`now downloading ${gDriveLink}\n`);
 
-      const tempDir: string = mkdtempSync(path.join(os.tmpdir(), "niwder-tmp"));
-
-      const fileRe: RegExp = new RegExp(
-        /^https:\/\/drive\.google\.com\/file\/d\/(.*?)\/.*?\?.*$/g
-      );
-
-      const folderRe: RegExp = new RegExp(
-        /^https:\/\/drive\.google\.com\/drive\/folders\/(.*)\?.*$/g
-      );
-
-      if (fileRe.test(gDriveLink)) {
-        const fileId: string = gDriveLink.replace(fileRe, "$1");
-
-        const downloadedFile: FileObject = await this.downloadFile(
-          fileId,
-          tempDir
+        const tempDir: string = mkdtempSync(
+          path.join(os.tmpdir(), "niwder-tmp")
         );
-        await this.job.updateProgress(49);
-        return resolve(downloadedFile);
-      } else if (folderRe.test(gDriveLink)) {
-        const fileId: string = gDriveLink.replace(folderRe, "$1");
 
-        const downloadedFile: FileObject = await this.downloadFolder(
-          fileId,
-          tempDir
+        const fileRe: RegExp = new RegExp(
+          /^https:\/\/drive\.google\.com\/file\/d\/(.*?)\/.*?\??.*$/g
         );
-        await this.job.updateProgress(49);
-        return resolve(downloadedFile);
-      } else {
-        return reject(new Error("Google Drive link is not understandable"));
+
+        const folderRe: RegExp = new RegExp(
+          /^https:\/\/drive\.google\.com\/drive\/folders\/(.*)\??.*$/g
+        );
+
+        if (fileRe.test(gDriveLink)) {
+          const fileId: string = gDriveLink.replace(fileRe, "$1");
+
+          const downloadedFile: FileObject = await this.downloadFile(
+            fileId,
+            tempDir
+          );
+          await this.job.updateProgress(49);
+          return resolve(downloadedFile);
+        } else if (folderRe.test(gDriveLink)) {
+          const fileId: string = gDriveLink.replace(folderRe, "$1");
+
+          const downloadedFile: FileObject = await this.downloadFolder(
+            fileId,
+            tempDir
+          );
+          await this.job.updateProgress(49);
+          return resolve(downloadedFile);
+        } else {
+          return reject(new Error("Google Drive link is not understandable"));
+        }
+      } catch (e) {
+        reject(e);
       }
     });
   };
