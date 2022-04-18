@@ -48,7 +48,7 @@ const worker: Worker = new Worker(
         }
       }
     } catch (e) {
-      console.log(e.message);
+      throw e;
     }
   },
   { connection }
@@ -74,12 +74,12 @@ worker.on("drained", () => {
   console.log(keys.MAIN_QUEUE, "drained");
 });
 
-worker.on("error", (err: Error) => {
-  console.error(keys.MAIN_QUEUE, err);
+worker.on("error", (error: Error) => {
+  console.error(keys.MAIN_QUEUE, "[-]", error.message);
 });
 
 worker.on("failed", (job: Job, error: Error) => {
-  console.log(keys.MAIN_QUEUE, job.name, job.data.url, error);
+  console.log(keys.MAIN_QUEUE, job.name, job.data.url, "[-]", error.message);
 });
 
 worker.on("progress", (job: Job, progress: number) => {

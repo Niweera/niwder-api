@@ -408,46 +408,50 @@ export default class GDriveService {
 
     const promises: Promise<void>[] = arrayOfFiles.map(async (file) => {
       return new Promise<void>(async (resolve, reject) => {
-        const filePath: string = path.join(dirPath, file.name);
-        if (file.mimeType === "application/vnd.google-apps.folder") {
-          if (!existsSync(filePath)) {
-            mkdirSync(filePath);
-          }
-          await GDriveService.getDriveFiles(
-            drive,
-            file.id,
-            filePath,
-            firebaseService
-          );
-          return resolve();
-        } else {
-          const response: GaxiosResponse<Readable> = await drive.files.get(
-            { fileId: file.id, alt: "media" },
-            { responseType: "stream" }
-          );
-          const destination: WriteStream = createWriteStream(filePath);
-          let progress: number = 0;
+        try {
+          const filePath: string = path.join(dirPath, file.name);
+          if (file.mimeType === "application/vnd.google-apps.folder") {
+            if (!existsSync(filePath)) {
+              mkdirSync(filePath);
+            }
+            await GDriveService.getDriveFiles(
+              drive,
+              file.id,
+              filePath,
+              firebaseService
+            );
+            return resolve();
+          } else {
+            const response: GaxiosResponse<Readable> = await drive.files.get(
+              { fileId: file.id, alt: "media" },
+              { responseType: "stream" }
+            );
+            const destination: WriteStream = createWriteStream(filePath);
+            let progress: number = 0;
 
-          response.data
-            .on("error", (err) => {
-              return reject(err);
-            })
-            .on("close", () => {
-              if (existsSync(filePath)) {
-                return resolve();
-              } else {
-                return reject(new Error(`${filePath} missing`));
-              }
-            })
-            .on("data", async (d) => {
-              progress += d.length;
-              await firebaseService.recordTransferring({
-                name: file.name,
-                message: `Transferring from Google Drive`,
-                percentage: Math.round((progress / Number(file.size)) * 100),
-              });
-            })
-            .pipe(destination);
+            response.data
+              .on("error", (err) => {
+                return reject(err);
+              })
+              .on("close", () => {
+                if (existsSync(filePath)) {
+                  return resolve();
+                } else {
+                  return reject(new Error(`${filePath} missing`));
+                }
+              })
+              .on("data", async (d) => {
+                progress += d.length;
+                await firebaseService.recordTransferring({
+                  name: file.name,
+                  message: `Transferring from Google Drive`,
+                  percentage: Math.round((progress / Number(file.size)) * 100),
+                });
+              })
+              .pipe(destination);
+          }
+        } catch (e) {
+          reject(e);
         }
       });
     });
