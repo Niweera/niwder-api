@@ -499,11 +499,11 @@ export default class GDriveService {
         );
 
         const fileRe: RegExp = new RegExp(
-          /^https:\/\/drive\.google\.com\/file\/d\/(.*?)\/.*?\??.*$/g
+          /^https:\/\/drive\.google\.com\/file\/d\/(.*?)\/.*?\?.*$/g
         );
 
         const folderRe: RegExp = new RegExp(
-          /^https:\/\/drive\.google\.com\/drive\/folders\/(.*)\??.*$/g
+          /^https:\/\/drive\.google\.com\/drive\/folders\/(.*)\?.*$/g
         );
 
         if (fileRe.test(gDriveLink)) {

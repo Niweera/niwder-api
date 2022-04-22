@@ -1,6 +1,10 @@
 import type { Job } from "bullmq";
 import { db } from "../database";
-import type { TransfersData, TransferringData } from "../utilities/interfaces";
+import type {
+  TransfersData,
+  TransferringData,
+  DirectLinkRecord,
+} from "../utilities/interfaces";
 import type { DataSnapshot } from "@firebase/database-types";
 
 export default class FirebaseService {
@@ -45,5 +49,12 @@ export default class FirebaseService {
       .child("refreshToken")
       .once("value");
     return response.val();
+  };
+
+  public recordDirectLink = async (
+    fileID: string,
+    data: DirectLinkRecord
+  ): Promise<void> => {
+    await db.ref("directLinks").child(fileID).set(data);
   };
 }

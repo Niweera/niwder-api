@@ -4,12 +4,18 @@ import Service from "../services";
 import { routeAuth } from "../middleware/firebaser";
 import validator from "../middleware/validator";
 import OAuthService from "../services/OAuthService";
-import type { ExtendedParsedQs } from "../utilities/interfaces";
+import FileService from "../services/FileService";
+import type {
+  ExtendedParsedQs,
+  ServeFileObject,
+} from "../utilities/interfaces";
 
 const router: Router = Router();
 export const oAuthController: Router = Router();
+export const fileController: Router = Router();
 const service: Service = new Service();
 const oAuthService: OAuthService = new OAuthService();
+const fileService: FileService = new FileService();
 
 /** @route   GET /api
  *  @desc    Check API status
@@ -75,6 +81,19 @@ router.post(
   })
 );
 
+/** @route   POST /api/gdrive-to-direct
+ *  @desc    Convert Google Drive links to Direct links
+ *  @access  Private
+ */
+router.post(
+  "/api/gdrive-to-direct",
+  [routeAuth(), validator("Main", "gdrive")],
+  asyncWrapper(async (req: Request, res: Response): Promise<any> => {
+    await service.gDriveToDirect(req.body.url, req.authenticatedUser.user_id);
+    res.sendStatus(204);
+  })
+);
+
 /** @route   GET /api/oauth
  *  @desc    Redirect user for OAuth2
  *  @access  Private
@@ -124,6 +143,33 @@ oAuthController.get(
       res.redirect(302, url);
     }
   )
+);
+
+/** @route   GET /api/file/:fileID
+ *  @desc    Download files by ID
+ *  @access  Public
+ */
+fileController.get(
+  "/:fileID",
+  asyncWrapper(async (req: Request, res: Response): Promise<any> => {
+    const fileObject: ServeFileObject | null = await fileService.serve(
+      req.params.fileID
+    );
+    if (fileObject) {
+      res.download(fileObject.path, fileObject.name, (err) => {
+        if (err) {
+          if (!res.headersSent) {
+            res.sendStatus(500);
+          }
+          console.log(err);
+        }
+      });
+    } else {
+      res.status(404).send({
+        message: "The requested file is not found (link expired maybe?)",
+      });
+    }
+  })
 );
 
 export default router;

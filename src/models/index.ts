@@ -7,7 +7,7 @@ export const URLValidationSchema: ObjectSchema = Joi.object({
 export const GDriveValidationSchema: ObjectSchema = Joi.object({
   url: Joi.string()
     .regex(
-      /(^https:\/\/drive\.google\.com\/file\/d\/.*?\/.*?\??.*$|^https:\/\/drive\.google\.com\/drive\/folders\/.*\??.*$)/,
+      /(^https:\/\/drive\.google\.com\/file\/d\/.*?\/.*?\?.*$|^https:\/\/drive\.google\.com\/drive\/folders\/.*\?.*$)/,
       "gdrive"
     )
     .required(),

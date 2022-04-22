@@ -41,3 +41,26 @@ export type ExtendedParsedQs = {
   error?: string;
   state?: string;
 };
+
+export type DirectLinkRecord = {
+  name: string;
+  mimeType: string;
+  size: number;
+  filePath: string;
+};
+
+export type DirectFilePath = {
+  filePath: string;
+  size?: number;
+};
+
+export type DirectLinkData = {
+  name: string;
+  directLink: string;
+  size: number;
+};
+
+export type ServeFileObject = {
+  name: string;
+  path: string;
+};

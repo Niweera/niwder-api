@@ -1,5 +1,6 @@
 import { db } from "../database";
 import type { DataSnapshot } from "@firebase/database-types";
+import type { DirectLinkRecord } from "../utilities/interfaces";
 
 export default class FirebaseService {
   public recordRefreshToken = async (
@@ -36,5 +37,19 @@ export default class FirebaseService {
       .child(uid)
       .once("value");
     return response.exists();
+  };
+
+  public getFilePath = async (
+    fileID: string
+  ): Promise<DirectLinkRecord | null> => {
+    const response: DataSnapshot = await db
+      .ref("directLinks")
+      .child(fileID)
+      .once("value");
+    if (response.exists()) {
+      return response.val();
+    } else {
+      return null;
+    }
   };
 }
