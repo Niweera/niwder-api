@@ -32,17 +32,30 @@ export default class FileService {
           );
           const zipPath: string = path.join(tempDir, fileName + ".zip");
           const zip: ChildProcessWithoutNullStreams = spawn("zip", [
-            "-r",
+            "-rdc",
             zipPath,
             filePath,
           ]);
 
-          zip.stdout.on("data", async () => {
-            await firebaseService.recordTransferring({
-              name: fileName,
-              message: `Zipping files`,
-              percentage: 10, //TODO: parse the zipping progress and add here
-            });
+          const percentageRe: RegExp = new RegExp(/\s+(\d+)\/\s+(\d+)\s+\w+./g);
+
+          zip.stdout.on("data", async (data) => {
+            const matches = JSON.stringify(data.toString()).matchAll(
+              percentageRe
+            );
+            for (const match of matches) {
+              if (match.length > 2) {
+                await firebaseService.recordTransferring({
+                  name: fileName,
+                  message: `Zipping files`,
+                  percentage: Math.round(
+                    (parseInt(match[1]) /
+                      (parseInt(match[1]) + parseInt(match[2]))) *
+                      100
+                  ),
+                });
+              }
+            }
           });
 
           zip.stderr.on("data", async (data) => {
