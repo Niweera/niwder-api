@@ -19,7 +19,7 @@ export default class MegaService {
   }
 
   private getMegaLink = async (fileName: string): Promise<string> => {
-    return new Promise((resolve, reject) => {
+    return new Promise<string>((resolve, reject) => {
       try {
         const megaCMD: ChildProcessWithoutNullStreams = spawn("mega-export", [
           "-a",
@@ -56,7 +56,7 @@ export default class MegaService {
     fileName: string,
     filePath: string
   ): Promise<string> => {
-    return new Promise((resolve, reject) => {
+    return new Promise<string>((resolve, reject) => {
       try {
         console.log(`now uploading ${filePath} to Mega.nz\n`);
 
@@ -116,7 +116,7 @@ export default class MegaService {
   };
 
   public downloadFromMega = async (): Promise<FileObject> => {
-    return new Promise(async (resolve, reject) => {
+    return new Promise<FileObject>(async (resolve, reject) => {
       try {
         const megaURL: string = this.job.data.url;
         console.log(`now downloading ${megaURL}`);

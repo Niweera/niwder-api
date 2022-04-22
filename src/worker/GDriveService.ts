@@ -319,7 +319,7 @@ export default class GDriveService {
     fileId: string,
     basePath: string
   ): Promise<FileObject> => {
-    return new Promise(async (resolve, reject) => {
+    return new Promise<FileObject>(async (resolve, reject) => {
       try {
         const file: drive_v3.Schema$File = await this.getGDriveFile(fileId);
 
@@ -489,7 +489,7 @@ export default class GDriveService {
   };
 
   public downloadFromGDrive = async (): Promise<FileObject> => {
-    return new Promise(async (resolve, reject) => {
+    return new Promise<FileObject>(async (resolve, reject) => {
       try {
         const gDriveLink: string = this.job.data.url;
         console.log(`now downloading ${gDriveLink}\n`);

@@ -17,7 +17,7 @@ export default class WGETService {
   }
 
   public downloadToDisk = async (): Promise<FileObject> => {
-    return new Promise(async (resolve, reject) => {
+    return new Promise<FileObject>(async (resolve, reject) => {
       try {
         const url: string = this.job.data.url;
         console.log(`now downloading ${url}\n\n`);
