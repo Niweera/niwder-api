@@ -94,6 +94,19 @@ router.post(
   })
 );
 
+/** @route   POST /api/mega-to-direct
+ *  @desc    Convert Mega.nz links to Direct links
+ *  @access  Private
+ */
+router.post(
+  "/api/mega-to-direct",
+  [routeAuth(), validator("Main", "mega")],
+  asyncWrapper(async (req: Request, res: Response): Promise<any> => {
+    await service.megaToDirect(req.body.url, req.authenticatedUser.user_id);
+    res.sendStatus(204);
+  })
+);
+
 /** @route   GET /api/oauth
  *  @desc    Redirect user for OAuth2
  *  @access  Private

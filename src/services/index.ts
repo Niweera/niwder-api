@@ -74,4 +74,17 @@ export default class Service {
     });
     console.log(`job added [${job.name}] [${url}]`);
   };
+
+  megaToDirect = async (url: string, uid: string): Promise<void> => {
+    const name: string = createHash("sha256")
+      .update(url)
+      .digest("hex")
+      .slice(0, 10);
+    const job: Job = await queue.add(name, {
+      queue: keys.MEGA_TO_DIRECT_QUEUE,
+      url,
+      uid,
+    });
+    console.log(`job added [${job.name}] [${url}]`);
+  };
 }

@@ -6,6 +6,7 @@ import GDriveToMegaWorker from "./GDriveToMegaWorker";
 import DirectToGDriveWorker from "./DirectToGDriveWorker";
 import DirectToMegaWorker from "./DirectToMegaWorker";
 import GDriveToDirectWorker from "./GDriveToDirectWorker";
+import MegaToDirectWorker from "./MegaToDirectWorker";
 import FCMService from "./FCMService";
 
 const connection = new IORedis(keys.REDIS_URL, {
@@ -49,6 +50,13 @@ const worker: Worker = new Worker(
           const gDriveToDirectWorker: GDriveToDirectWorker =
             new GDriveToDirectWorker(job);
           await gDriveToDirectWorker.run();
+          break;
+        }
+        case keys.MEGA_TO_DIRECT_QUEUE: {
+          const megaToDirectWorker: MegaToDirectWorker = new MegaToDirectWorker(
+            job
+          );
+          await megaToDirectWorker.run();
           break;
         }
         default: {
