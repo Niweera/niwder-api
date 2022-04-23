@@ -31,11 +31,11 @@ export default class FileService {
             path.join(os.tmpdir(), "niwder-files")
           );
           const zipPath: string = path.join(tempDir, fileName + ".zip");
-          const zip: ChildProcessWithoutNullStreams = spawn("zip", [
-            "-rdc",
-            zipPath,
-            filePath,
-          ]);
+          const zip: ChildProcessWithoutNullStreams = spawn(
+            "zip",
+            ["-rdc", zipPath, "."],
+            { cwd: filePath }
+          );
 
           const percentageRe: RegExp = new RegExp(/\s+(\d+)\/\s+(\d+)\s+\w+./g);
 
