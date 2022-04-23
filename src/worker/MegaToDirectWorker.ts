@@ -6,6 +6,7 @@ import FileService from "./FileService";
 import type { TransfersData } from "../utilities/interfaces";
 import FirebaseService from "./FirebaseService";
 import MegaService from "./MegaService";
+import keys from "../keys";
 
 export default class MegaToDirectWorker {
   private readonly job: Job;
@@ -13,7 +14,7 @@ export default class MegaToDirectWorker {
 
   constructor(job: Job) {
     this.job = job;
-    this.dbPath = "mega-to-direct";
+    this.dbPath = keys.MEGA_TO_DIRECT_QUEUE;
   }
 
   private sendFCMNotification = async (

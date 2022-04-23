@@ -6,6 +6,7 @@ import FCMService from "./FCMService";
 import FileService from "./FileService";
 import type { TransfersData } from "../utilities/interfaces";
 import FirebaseService from "./FirebaseService";
+import keys from "../keys";
 
 export default class GDriveToDirectWorker {
   private readonly job: Job;
@@ -13,7 +14,7 @@ export default class GDriveToDirectWorker {
 
   constructor(job: Job) {
     this.job = job;
-    this.dbPath = "gdrive-to-direct";
+    this.dbPath = keys.GDRIVE_TO_DIRECT_QUEUE;
   }
 
   private sendFCMNotification = async (

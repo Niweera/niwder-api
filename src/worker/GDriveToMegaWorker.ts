@@ -6,12 +6,15 @@ import FCMService from "./FCMService";
 import MegaService from "./MegaService";
 import type { TransfersData } from "../utilities/interfaces";
 import FirebaseService from "./FirebaseService";
+import keys from "../keys";
 
 export default class GDriveToMegaWorker {
   private readonly job: Job;
+  private readonly dbPath: string;
 
   constructor(job: Job) {
     this.job = job;
+    this.dbPath = keys.GDRIVE_TO_MEGA_QUEUE;
   }
 
   private sendFCMNotification = async (
@@ -28,13 +31,10 @@ export default class GDriveToMegaWorker {
     await this.job.updateProgress(0);
     const gDriveService: GDriveService = await GDriveService.build(
       this.job,
-      "gdrive-to-mega"
+      this.dbPath
     );
     const fileObject: FileObject = await gDriveService.downloadFromGDrive();
-    const megaService: MegaService = new MegaService(
-      this.job,
-      "gdrive-to-mega"
-    );
+    const megaService: MegaService = new MegaService(this.job, this.dbPath);
     const megaLink: string = await megaService.uploadToMega(
       fileObject.fileName,
       fileObject.filePath
@@ -51,7 +51,7 @@ export default class GDriveToMegaWorker {
     };
     const firebaseService: FirebaseService = new FirebaseService(
       this.job,
-      "gdrive-to-mega"
+      this.dbPath
     );
     await firebaseService.recordDownloadURL(transfersData);
     await this.sendFCMNotification(fileObject.fileName, megaLink);

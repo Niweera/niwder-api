@@ -6,12 +6,15 @@ import WGETService from "./WGETService";
 import MegaService from "./MegaService";
 import type { TransfersData } from "../utilities/interfaces";
 import FirebaseService from "./FirebaseService";
+import keys from "../keys";
 
 export default class DirectToMegaWorker {
   private readonly job: Job;
+  private readonly dbPath: string;
 
   constructor(job: Job) {
     this.job = job;
+    this.dbPath = keys.DIRECT_TO_MEGA_QUEUE;
   }
 
   private sendFCMNotification = async (
@@ -26,15 +29,9 @@ export default class DirectToMegaWorker {
   public run = async (): Promise<void> => {
     console.log(`now starting transferring ${this.job.data.url}`);
     await this.job.updateProgress(0);
-    const wgetService: WGETService = new WGETService(
-      this.job,
-      "direct-to-mega"
-    );
+    const wgetService: WGETService = new WGETService(this.job, this.dbPath);
     const fileObject: FileObject = await wgetService.downloadToDisk();
-    const megaService: MegaService = new MegaService(
-      this.job,
-      "direct-to-mega"
-    );
+    const megaService: MegaService = new MegaService(this.job, this.dbPath);
     const megaLink: string = await megaService.uploadToMega(
       fileObject.fileName,
       fileObject.filePath
@@ -51,7 +48,7 @@ export default class DirectToMegaWorker {
     };
     const firebaseService: FirebaseService = new FirebaseService(
       this.job,
-      "direct-to-mega"
+      this.dbPath
     );
     await firebaseService.recordDownloadURL(transfersData);
     await this.sendFCMNotification(fileObject.fileName, megaLink);
