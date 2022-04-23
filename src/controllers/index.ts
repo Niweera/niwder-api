@@ -4,19 +4,13 @@ import Service from "../services";
 import { routeAuth } from "../middleware/firebaser";
 import validator from "../middleware/validator";
 import OAuthService from "../services/OAuthService";
-import FileService from "../services/FileService";
-import type {
-  ExtendedParsedQs,
-  ServeFileObject,
-} from "../utilities/interfaces";
 import keys from "../keys";
+import fileController from "./fileController";
+import oAuthController from "./oAuthController";
 
 const router: Router = Router();
-export const oAuthController: Router = Router();
-export const fileController: Router = Router();
 const service: Service = new Service();
 const oAuthService: OAuthService = new OAuthService();
-const fileService: FileService = new FileService();
 
 /** @route   GET /api
  *  @desc    Check API status
@@ -138,52 +132,4 @@ router.delete(
   })
 );
 
-/** @route   GET /api/oauth/callback
- *  @desc    OAuth2 Callback
- *  @access  Public
- */
-oAuthController.get(
-  "/",
-  asyncWrapper(
-    async (
-      req: Request<unknown, unknown, unknown, ExtendedParsedQs>,
-      res: Response
-    ): Promise<any> => {
-      const url: string = await oAuthService.handleCallback(
-        req.query.code,
-        req.query.state,
-        req.query.error
-      );
-      res.redirect(302, url);
-    }
-  )
-);
-
-/** @route   GET /api/file/:fileID
- *  @desc    Download files by ID
- *  @access  Public
- */
-fileController.get(
-  "/:fileID",
-  asyncWrapper(async (req: Request, res: Response): Promise<any> => {
-    const fileObject: ServeFileObject | null = await fileService.serve(
-      req.params.fileID
-    );
-    if (fileObject) {
-      res.download(fileObject.path, fileObject.name, (err) => {
-        if (err) {
-          if (!res.headersSent) {
-            res.sendStatus(500);
-          }
-          console.log(err);
-        }
-      });
-    } else {
-      res.status(404).send({
-        message: "The requested file is not found (link expired maybe?)",
-      });
-    }
-  })
-);
-
-export default router;
+export { router as mainController, fileController, oAuthController };

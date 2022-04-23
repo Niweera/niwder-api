@@ -16,7 +16,6 @@ export default {
   MEGA_TO_DIRECT_QUEUE: "mega-to-direct",
   GOOGLE_DRIVE_CLIENT_ID: process.env.GOOGLE_DRIVE_CLIENT_ID,
   GOOGLE_DRIVE_CLIENT_SECRET: process.env.GOOGLE_DRIVE_CLIENT_SECRET,
-  GOOGLE_DRIVE_REFRESH_TOKEN: process.env.GOOGLE_DRIVE_REFRESH_TOKEN,
   GOOGLE_DRIVE_REDIRECT_URI: "https://niwder-api.niweera.gq/api/oauth/callback",
   NIWDER_FILE_DIRECT_LINK_HOST: "https://niwder-api.niweera.gq/api/file",
   OAUTH_REDIRECT_URL: "https://niwder.niweera.gq/transfers",

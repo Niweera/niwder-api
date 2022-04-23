@@ -20,6 +20,22 @@ Niwder-UI and Niwder-API use [Firebase](https://firebase.google.com/) for hostin
 
 ![image](assets/ui.jpg)
 
+### Setting up Niwder-API
+
+1. Install Mega-CMD (this will be automatically done by `postinstall` script).
+2. [Log in to Mega-CMD](https://github.com/meganz/MEGAcmd/issues/36) using your email and password.
+3. [Upload a dummy file using `mega-put`, export it](https://github.com/meganz/MEGAcmd/blob/master/UserGuide.md#what-is-it) and accept the license agreement.
+4. Add [Firebase Service Account JSON file](https://firebase.google.com/docs/admin/setup#initialize-sdk) to `/src/keys/` directory.
+5. Add the following Environment Variables.
+
+```bash
+PORT=<number>
+FIREBASE_API_KEY=<string>
+REDIS_URL=<string>
+GOOGLE_DRIVE_CLIENT_ID=<string>
+GOOGLE_DRIVE_CLIENT_SECRET=<string>
+```
+
 New features to keep an eye on;
 
 - [x] Google Drive link to Mega.nz link
