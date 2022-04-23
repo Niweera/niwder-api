@@ -9,6 +9,7 @@ import type {
   ExtendedParsedQs,
   ServeFileObject,
 } from "../utilities/interfaces";
+import keys from "../keys";
 
 const router: Router = Router();
 export const oAuthController: Router = Router();
@@ -34,7 +35,7 @@ router.get(
  *  @access  Private
  */
 router.post(
-  "/api/mega-to-gdrive",
+  `/api/${keys.MEGA_TO_GDRIVE_QUEUE}`,
   [routeAuth(), validator("Main", "mega")],
   asyncWrapper(async (req: Request, res: Response): Promise<any> => {
     await service.megaToGDrive(req.body.url, req.authenticatedUser.user_id);
@@ -47,7 +48,7 @@ router.post(
  *  @access  Private
  */
 router.post(
-  "/api/gdrive-to-mega",
+  `/api/${keys.GDRIVE_TO_MEGA_QUEUE}`,
   [routeAuth(), validator("Main", "gdrive")],
   asyncWrapper(async (req: Request, res: Response): Promise<any> => {
     await service.gDriveToMega(req.body.url, req.authenticatedUser.user_id);
@@ -60,7 +61,7 @@ router.post(
  *  @access  Private
  */
 router.post(
-  "/api/direct-to-gdrive",
+  `/api/${keys.DIRECT_TO_GDRIVE_QUEUE}`,
   [routeAuth(), validator("Main", "url")],
   asyncWrapper(async (req: Request, res: Response): Promise<any> => {
     await service.directToGDrive(req.body.url, req.authenticatedUser.user_id);
@@ -73,7 +74,7 @@ router.post(
  *  @access  Private
  */
 router.post(
-  "/api/direct-to-mega",
+  `/api/${keys.DIRECT_TO_MEGA_QUEUE}`,
   [routeAuth(), validator("Main", "url")],
   asyncWrapper(async (req: Request, res: Response): Promise<any> => {
     await service.directToMega(req.body.url, req.authenticatedUser.user_id);
@@ -86,7 +87,7 @@ router.post(
  *  @access  Private
  */
 router.post(
-  "/api/gdrive-to-direct",
+  `/api/${keys.GDRIVE_TO_DIRECT_QUEUE}`,
   [routeAuth(), validator("Main", "gdrive")],
   asyncWrapper(async (req: Request, res: Response): Promise<any> => {
     await service.gDriveToDirect(req.body.url, req.authenticatedUser.user_id);
@@ -99,7 +100,7 @@ router.post(
  *  @access  Private
  */
 router.post(
-  "/api/mega-to-direct",
+  `/api/${keys.MEGA_TO_DIRECT_QUEUE}`,
   [routeAuth(), validator("Main", "mega")],
   asyncWrapper(async (req: Request, res: Response): Promise<any> => {
     await service.megaToDirect(req.body.url, req.authenticatedUser.user_id);
