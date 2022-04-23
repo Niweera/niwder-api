@@ -64,3 +64,8 @@ export type ServeFileObject = {
   name: string;
   path: string;
 };
+
+export type FCMDataPayload = {
+  job: string;
+  error: string;
+};

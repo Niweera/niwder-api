@@ -6,6 +6,7 @@ import GDriveToMegaWorker from "./GDriveToMegaWorker";
 import DirectToGDriveWorker from "./DirectToGDriveWorker";
 import DirectToMegaWorker from "./DirectToMegaWorker";
 import GDriveToDirectWorker from "./GDriveToDirectWorker";
+import FCMService from "./FCMService";
 
 const connection = new IORedis(keys.REDIS_URL, {
   maxRetriesPerRequest: null,
@@ -85,7 +86,12 @@ worker.on("error", (error: Error) => {
   console.error(keys.MAIN_QUEUE, "[-]", error.message);
 });
 
-worker.on("failed", (job: Job, error: Error) => {
+worker.on("failed", async (job: Job, error: Error) => {
+  const fcmService: FCMService = new FCMService(job.data.uid);
+  await fcmService.sendErrorMessage({
+    job: job.data.url,
+    error: error.message,
+  });
   console.log(keys.MAIN_QUEUE, job.name, job.data.url, "[-]", error.message);
 });
 
