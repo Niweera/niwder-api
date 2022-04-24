@@ -1,6 +1,7 @@
 import request from "supertest";
 import { app } from "../server";
 import { getIDToken } from "../middleware/firebaser.test";
+import keys from "../keys";
 
 const file =
   "https://mega.nz/file/o540lZQT#QtGNvAYWNGoX54Q5Bn4xhCNuvQnzMW5q7JhVlwAEuSw";
@@ -18,10 +19,10 @@ const gDriveFoldr =
 const directLink =
   "https://github.com/denoland/deno/releases/download/v1.20.4/deno-x86_64-unknown-linux-gnu.zip";
 
-describe("POST /mega-to-gdrive", () => {
+describe("POST /mega to gdrive", () => {
   it("Should return HTTP 204", async () => {
     const res: request.Response = await request(app)
-      .post("/api/mega-to-gdrive")
+      .post(`/api/${keys.MEGA_TO_GDRIVE_QUEUE}`)
       .send({
         url: file,
       })
@@ -31,10 +32,10 @@ describe("POST /mega-to-gdrive", () => {
   });
 });
 
-describe("POST /gdrive-to-mega", () => {
+describe("POST /gdrive to mega", () => {
   it("Should return HTTP 204", async () => {
     const res: request.Response = await request(app)
-      .post("/api/gdrive-to-mega")
+      .post(`/api/${keys.GDRIVE_TO_MEGA_QUEUE}`)
       .send({
         url: gDriveFoldr,
       })
@@ -44,10 +45,10 @@ describe("POST /gdrive-to-mega", () => {
   });
 });
 
-describe("POST /direct-to-gdrive", () => {
+describe("POST /direct to gdrive", () => {
   it("Should return HTTP 204", async () => {
     const res: request.Response = await request(app)
-      .post("/api/direct-to-gdrive")
+      .post(`/api/${keys.DIRECT_TO_GDRIVE_QUEUE}`)
       .send({
         url: directLink,
       })
@@ -57,10 +58,10 @@ describe("POST /direct-to-gdrive", () => {
   });
 });
 
-describe("POST /direct-to-mega", () => {
+describe("POST /direct to mega", () => {
   it("Should return HTTP 204", async () => {
     const res: request.Response = await request(app)
-      .post("/api/direct-to-mega")
+      .post(`/api/${keys.DIRECT_TO_MEGA_QUEUE}`)
       .send({
         url: directLink,
       })
