@@ -16,6 +16,7 @@ export default {
   MEGA_TO_DIRECT_QUEUE: "mega-to-direct",
   TORRENTS_TO_GDRIVE_QUEUE: "torrents-to-gdrive",
   TORRENTS_TO_MEGA_QUEUE: "torrents-to-mega",
+  TORRENTS_TO_DIRECT_QUEUE: "torrents-to-direct",
   GOOGLE_DRIVE_CLIENT_ID: process.env.GOOGLE_DRIVE_CLIENT_ID,
   GOOGLE_DRIVE_CLIENT_SECRET: process.env.GOOGLE_DRIVE_CLIENT_SECRET,
   GOOGLE_DRIVE_REDIRECT_URI: "https://niwder-api.niweera.gq/api/oauth/callback",
