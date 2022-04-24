@@ -47,5 +47,7 @@ New features to keep an eye on;
 - [ ] Torrents to Mega.nz link
 - [ ] Torrents to direct download link
 
+This project uses [WebTorrent](https://github.com/webtorrent/webtorrent).
+
 Niwder-API is live on https://niwder-api.niweera.gq. <br/>
 Niwder is live on https://niwder.niweera.gq.

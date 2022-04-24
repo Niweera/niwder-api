@@ -22,6 +22,12 @@ export const MegaValidationSchema: ObjectSchema = Joi.object({
     .required(),
 });
 
+export const MagnetValidationSchema: ObjectSchema = Joi.object({
+  url: Joi.string()
+    .regex(/magnet:\?xt=urn:[a-zA-Z0-9]+:[a-zA-Z0-9]+&?.*/, "magnet")
+    .required(),
+});
+
 export const DefaultValidationSchema: ObjectSchema = Joi.object({
   url: Joi.string().required(),
 });

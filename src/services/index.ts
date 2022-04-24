@@ -10,80 +10,21 @@ const connection = new IORedis(keys.REDIS_URL, {
 const queue = new Queue(keys.MAIN_QUEUE, { connection });
 
 export default class Service {
-  megaToGDrive = async (url: string, uid: string): Promise<void> => {
+  serve = async (
+    url: string,
+    uid: string,
+    queueName: string,
+    kwargs?: Record<string, any>
+  ): Promise<void> => {
     const name: string = createHash("sha256")
       .update(url)
       .digest("hex")
       .slice(0, 10);
     const job: Job = await queue.add(name, {
-      queue: keys.MEGA_TO_GDRIVE_QUEUE,
+      queue: queueName,
       url,
       uid,
-    });
-    console.log(`job added [${job.name}] [${url}]`);
-  };
-
-  gDriveToMega = async (url: string, uid: string): Promise<void> => {
-    const name: string = createHash("sha256")
-      .update(url)
-      .digest("hex")
-      .slice(0, 10);
-    const job: Job = await queue.add(name, {
-      queue: keys.GDRIVE_TO_MEGA_QUEUE,
-      url,
-      uid,
-    });
-    console.log(`job added [${job.name}] [${url}]`);
-  };
-
-  directToGDrive = async (url: string, uid: string): Promise<void> => {
-    const name: string = createHash("sha256")
-      .update(url)
-      .digest("hex")
-      .slice(0, 10);
-    const job: Job = await queue.add(name, {
-      queue: keys.DIRECT_TO_GDRIVE_QUEUE,
-      url,
-      uid,
-    });
-    console.log(`job added [${job.name}] [${url}]`);
-  };
-
-  directToMega = async (url: string, uid: string): Promise<void> => {
-    const name: string = createHash("sha256")
-      .update(url)
-      .digest("hex")
-      .slice(0, 10);
-    const job: Job = await queue.add(name, {
-      queue: keys.DIRECT_TO_MEGA_QUEUE,
-      url,
-      uid,
-    });
-    console.log(`job added [${job.name}] [${url}]`);
-  };
-
-  gDriveToDirect = async (url: string, uid: string): Promise<void> => {
-    const name: string = createHash("sha256")
-      .update(url)
-      .digest("hex")
-      .slice(0, 10);
-    const job: Job = await queue.add(name, {
-      queue: keys.GDRIVE_TO_DIRECT_QUEUE,
-      url,
-      uid,
-    });
-    console.log(`job added [${job.name}] [${url}]`);
-  };
-
-  megaToDirect = async (url: string, uid: string): Promise<void> => {
-    const name: string = createHash("sha256")
-      .update(url)
-      .digest("hex")
-      .slice(0, 10);
-    const job: Job = await queue.add(name, {
-      queue: keys.MEGA_TO_DIRECT_QUEUE,
-      url,
-      uid,
+      ...kwargs,
     });
     console.log(`job added [${job.name}] [${url}]`);
   };

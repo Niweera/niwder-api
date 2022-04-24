@@ -3,6 +3,7 @@ import {
   GDriveValidationSchema,
   MegaValidationSchema,
   DefaultValidationSchema,
+  MagnetValidationSchema,
 } from "../models";
 import { ValidationError } from "../errors";
 import type { NextFunction, Request, Response } from "express";
@@ -15,6 +16,7 @@ const validators: Validator = {
       url: URLValidationSchema,
       gdrive: GDriveValidationSchema,
       mega: MegaValidationSchema,
+      magnet: MagnetValidationSchema,
       default: DefaultValidationSchema,
     },
   },
