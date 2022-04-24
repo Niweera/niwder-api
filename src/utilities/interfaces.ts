@@ -24,6 +24,7 @@ export type TransfersData = {
   megaLink?: string;
   gDriveLink?: string;
   directLink?: string;
+  magnetLink?: string;
   timestamp: Object;
   name: string;
   size: number;

@@ -173,4 +173,21 @@ router.post(
   })
 );
 
+/** @route   POST /api/torrents-to-mega
+ *  @desc    Convert torrents to Mega.nz links
+ *  @access  Private
+ */
+router.post(
+  `/api/${keys.TORRENTS_TO_MEGA_QUEUE}`,
+  [routeAuth(), validator("Main", "magnet")],
+  asyncWrapper(async (req: Request, res: Response): Promise<any> => {
+    await service.serve(
+      req.body.url,
+      req.authenticatedUser.user_id,
+      keys.TORRENTS_TO_MEGA_QUEUE
+    );
+    res.sendStatus(204);
+  })
+);
+
 export { router as mainController, fileController, oAuthController };
