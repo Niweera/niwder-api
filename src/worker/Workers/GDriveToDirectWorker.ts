@@ -1,20 +1,20 @@
 import type { Job } from "bullmq";
 import { ServerValue } from "firebase-admin/database";
-import GDriveService from "./GDriveService";
-import type { FileObject } from "../utilities/interfaces";
-import FCMService from "./FCMService";
-import MegaService from "./MegaService";
-import type { TransfersData } from "../utilities/interfaces";
-import FirebaseService from "./FirebaseService";
-import keys from "../keys";
+import GDriveService from "../Services/GDriveService";
+import type { DirectLinkData, FileObject } from "../../utilities/interfaces";
+import FCMService from "../Services/FCMService";
+import FileService from "../Services/FileService";
+import type { TransfersData } from "../../utilities/interfaces";
+import FirebaseService from "../Services/FirebaseService";
+import keys from "../../keys";
 
-export default class GDriveToMegaWorker {
+export default class GDriveToDirectWorker {
   private readonly job: Job;
   private readonly dbPath: string;
 
   constructor(job: Job) {
     this.job = job;
-    this.dbPath = keys.GDRIVE_TO_MEGA_QUEUE;
+    this.dbPath = keys.GDRIVE_TO_DIRECT_QUEUE;
   }
 
   private sendFCMNotification = async (
@@ -34,19 +34,22 @@ export default class GDriveToMegaWorker {
       this.dbPath
     );
     const fileObject: FileObject = await gDriveService.downloadFromGDrive();
-    const megaService: MegaService = new MegaService(this.job, this.dbPath);
-    const megaLink: string = await megaService.uploadToMega(
+    const fileService: FileService = new FileService(this.job, this.dbPath);
+    const directLinkData: DirectLinkData = await fileService.createDirectLink(
       fileObject.fileName,
-      fileObject.filePath
+      fileObject.filePath,
+      fileObject.directory,
+      fileObject.fileMimeType,
+      fileObject.fileSize
     );
     const transfersData: TransfersData = {
       gDriveLink: this.job.data.url,
-      megaLink: megaLink,
+      directLink: directLinkData.directLink,
       timestamp: ServerValue.TIMESTAMP,
-      name: fileObject.fileName,
-      size: fileObject.fileSize,
+      name: fileObject.directory ? directLinkData.name : fileObject.fileName,
+      size: fileObject.directory ? directLinkData.size : fileObject.fileSize,
       mimeType: fileObject.directory
-        ? "inode/directory"
+        ? "application/zip"
         : fileObject.fileMimeType,
     };
     const firebaseService: FirebaseService = new FirebaseService(
@@ -54,6 +57,9 @@ export default class GDriveToMegaWorker {
       this.dbPath
     );
     await firebaseService.recordDownloadURL(transfersData);
-    await this.sendFCMNotification(fileObject.fileName, megaLink);
+    await this.sendFCMNotification(
+      fileObject.fileName,
+      directLinkData.directLink
+    );
   };
 }

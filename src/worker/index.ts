@@ -1,13 +1,13 @@
 import { Job, Worker } from "bullmq";
 import IORedis from "ioredis";
 import keys from "../keys";
-import MegaToGDriveWorker from "./MegaToGDriveWorker";
-import GDriveToMegaWorker from "./GDriveToMegaWorker";
-import DirectToGDriveWorker from "./DirectToGDriveWorker";
-import DirectToMegaWorker from "./DirectToMegaWorker";
-import GDriveToDirectWorker from "./GDriveToDirectWorker";
-import MegaToDirectWorker from "./MegaToDirectWorker";
-import FCMService from "./FCMService";
+import MegaToGDriveWorker from "./Workers/MegaToGDriveWorker";
+import GDriveToMegaWorker from "./Workers/GDriveToMegaWorker";
+import DirectToGDriveWorker from "./Workers/DirectToGDriveWorker";
+import DirectToMegaWorker from "./Workers/DirectToMegaWorker";
+import GDriveToDirectWorker from "./Workers/GDriveToDirectWorker";
+import MegaToDirectWorker from "./Workers/MegaToDirectWorker";
+import FCMService from "./Services/FCMService";
 
 const connection: IORedis.Redis = new IORedis(keys.REDIS_URL, {
   maxRetriesPerRequest: null,

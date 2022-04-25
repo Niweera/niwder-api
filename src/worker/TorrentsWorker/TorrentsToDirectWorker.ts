@@ -1,12 +1,12 @@
 import type { Job } from "bullmq";
 import { ServerValue } from "firebase-admin/database";
 import type { FileObject } from "../../utilities/interfaces";
-import FCMService from "../FCMService";
+import FCMService from "../Services/FCMService";
 import type { TransfersData } from "../../utilities/interfaces";
-import FirebaseService from "../FirebaseService";
+import FirebaseService from "../Services/FirebaseService";
 import keys from "../../keys";
 import TorrentsService from "./TorrentsService";
-import FileService from "../FileService";
+import FileService from "../Services/FileService";
 import type { DirectLinkData } from "../../utilities/interfaces";
 
 export default class TorrentsToDirectWorker {

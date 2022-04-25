@@ -1,12 +1,12 @@
 import type { Job } from "bullmq";
 import { ServerValue } from "firebase-admin/database";
 import type { FileObject } from "../../utilities/interfaces";
-import FCMService from "../FCMService";
+import FCMService from "../Services/FCMService";
 import type { TransfersData } from "../../utilities/interfaces";
-import FirebaseService from "../FirebaseService";
+import FirebaseService from "../Services/FirebaseService";
 import keys from "../../keys";
 import TorrentsService from "./TorrentsService";
-import MegaService from "../MegaService";
+import MegaService from "../Services/MegaService";
 
 export default class TorrentsToMegaWorker {
   private readonly job: Job;

@@ -1,9 +1,9 @@
 import type { database } from "firebase-admin";
-import { db } from "../database";
+import { db } from "../../database";
 import { BatchResponse, getMessaging } from "firebase-admin/messaging";
 import type { MulticastMessage } from "firebase-admin/lib/messaging/messaging-api";
 import type { DataSnapshot } from "@firebase/database-types";
-import type { FCMDataPayload } from "../utilities/interfaces";
+import type { FCMDataPayload } from "../../utilities/interfaces";
 
 export default class FCMService {
   private ref: database.Reference;

@@ -1,4 +1,4 @@
-import type { FileObject } from "../utilities/interfaces";
+import type { FileObject } from "../../utilities/interfaces";
 import { mkdtempSync, readdirSync, statSync } from "fs";
 import path from "path";
 import os from "os";

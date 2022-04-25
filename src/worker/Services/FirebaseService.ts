@@ -1,10 +1,10 @@
 import type { Job } from "bullmq";
-import { db } from "../database";
+import { db } from "../../database";
 import type {
   TransfersData,
   TransferringData,
   DirectLinkRecord,
-} from "../utilities/interfaces";
+} from "../../utilities/interfaces";
 import type { DataSnapshot } from "@firebase/database-types";
 
 export default class FirebaseService {

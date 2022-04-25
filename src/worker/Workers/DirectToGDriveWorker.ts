@@ -1,12 +1,12 @@
 import type { Job } from "bullmq";
 import { ServerValue } from "firebase-admin/database";
-import GDriveService from "./GDriveService";
-import type { FileObject } from "../utilities/interfaces";
-import FCMService from "./FCMService";
-import WGETService from "./WGETService";
-import type { TransfersData } from "../utilities/interfaces";
-import FirebaseService from "./FirebaseService";
-import keys from "../keys";
+import GDriveService from "../Services/GDriveService";
+import type { FileObject } from "../../utilities/interfaces";
+import FCMService from "../Services/FCMService";
+import WGETService from "../Services/WGETService";
+import type { TransfersData } from "../../utilities/interfaces";
+import FirebaseService from "../Services/FirebaseService";
+import keys from "../../keys";
 
 export default class DirectToGDriveWorker {
   private readonly job: Job;

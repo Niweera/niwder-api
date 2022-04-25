@@ -1,5 +1,5 @@
 import { Auth, drive_v3, google } from "googleapis";
-import keys from "../keys";
+import keys from "../../keys";
 import {
   createReadStream,
   createWriteStream,
@@ -15,7 +15,7 @@ import type { Job } from "bullmq";
 import type { GaxiosResponse } from "gaxios";
 import path from "path";
 import mime from "mime-types";
-import type { FileObject } from "../utilities/interfaces";
+import type { FileObject } from "../../utilities/interfaces";
 import type { Readable } from "stream";
 import os from "os";
 import FirebaseService from "./FirebaseService";

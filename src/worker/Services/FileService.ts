@@ -1,13 +1,13 @@
 import { existsSync, mkdtempSync, rmSync, statSync } from "fs";
 import type { Job } from "bullmq";
 import FirebaseService from "./FirebaseService";
-import keys from "../keys";
-import type { DirectFilePath } from "../utilities/interfaces";
+import keys from "../../keys";
+import type { DirectFilePath } from "../../utilities/interfaces";
 import { ChildProcessWithoutNullStreams, spawn } from "child_process";
 import path from "path";
 import os from "os";
 import { createHash } from "crypto";
-import type { DirectLinkData } from "../utilities/interfaces";
+import type { DirectLinkData } from "../../utilities/interfaces";
 
 export default class FileService {
   private readonly job: Job;

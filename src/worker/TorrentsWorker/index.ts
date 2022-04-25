@@ -4,7 +4,7 @@ import { Job, Worker } from "bullmq";
 import TorrentsToGDriveWorker from "./TorrentsToGDriveWorker";
 import TorrentsToMegaWorker from "./TorrentsToMegaWorker";
 import TorrentsToDirectWorker from "./TorrentsToDirectWorker";
-import FCMService from "../FCMService";
+import FCMService from "../Services/FCMService";
 
 const connection: IORedis.Redis = new IORedis(keys.REDIS_URL, {
   maxRetriesPerRequest: null,

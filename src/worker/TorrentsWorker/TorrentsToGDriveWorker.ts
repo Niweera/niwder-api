@@ -1,10 +1,10 @@
 import type { Job } from "bullmq";
 import { ServerValue } from "firebase-admin/database";
-import GDriveService from "../GDriveService";
+import GDriveService from "../Services/GDriveService";
 import type { FileObject } from "../../utilities/interfaces";
-import FCMService from "../FCMService";
+import FCMService from "../Services/FCMService";
 import type { TransfersData } from "../../utilities/interfaces";
-import FirebaseService from "../FirebaseService";
+import FirebaseService from "../Services/FirebaseService";
 import keys from "../../keys";
 import TorrentsService from "./TorrentsService";
 

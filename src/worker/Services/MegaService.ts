@@ -2,12 +2,12 @@ import { existsSync, mkdtempSync, readdirSync, rmSync, statSync } from "fs";
 import { ChildProcessWithoutNullStreams, spawn } from "child_process";
 import path from "path";
 import type { Job } from "bullmq";
-import type { FileObject } from "../utilities/interfaces";
+import type { FileObject } from "../../utilities/interfaces";
 import os from "os";
 import { File as MEGAFile } from "megajs";
 import mime from "mime-types";
 import FirebaseService from "./FirebaseService";
-import keys from "../keys";
+import keys from "../../keys";
 
 export default class MegaService {
   private readonly job: Job;
