@@ -52,8 +52,13 @@ export default class Service {
     queueName: string,
     kwargs?: Record<string, any>
   ): Promise<void> => {
+    const uidHash: string = createHash("sha256")
+      .update(url)
+      .update(uid)
+      .digest("hex")
+      .slice(0, 10);
     const job: Job = await this.queueJob(
-      url,
+      `${url}&uid=${uidHash}`,
       uid,
       torrentsQueue,
       queueName,

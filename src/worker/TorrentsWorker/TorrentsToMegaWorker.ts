@@ -7,14 +7,17 @@ import FirebaseService from "../Services/FirebaseService";
 import keys from "../../keys";
 import TorrentsService from "./TorrentsService";
 import MegaService from "../Services/MegaService";
+import type { Instance } from "webtorrent";
 
 export default class TorrentsToMegaWorker {
   private readonly job: Job;
   private readonly dbPath: string;
+  private readonly client: Instance;
 
-  constructor(job: Job) {
+  constructor(job: Job, client: Instance) {
     this.job = job;
     this.dbPath = keys.TORRENTS_TO_MEGA_QUEUE;
+    this.client = client;
   }
 
   private sendFCMNotification = async (
@@ -31,7 +34,8 @@ export default class TorrentsToMegaWorker {
     await this.job.updateProgress(0);
     const torrentsService: TorrentsService = new TorrentsService(
       this.job,
-      this.dbPath
+      this.dbPath,
+      this.client
     );
     const fileObject: FileObject = await torrentsService.downloadToDisk();
     const megaService: MegaService = new MegaService(this.job, this.dbPath);
@@ -39,7 +43,7 @@ export default class TorrentsToMegaWorker {
       fileObject.fileName,
       fileObject.filePath
     );
-    await torrentsService.destroyTorrentClient();
+    await torrentsService.destroyTorrent();
     const transfersData: TransfersData = {
       magnetLink: this.job.data.url,
       megaLink: megaLink,

@@ -3,20 +3,50 @@ import { mkdtempSync, readdirSync, statSync } from "fs";
 import path from "path";
 import os from "os";
 import type { Job } from "bullmq";
-import WebTorrent from "webtorrent";
+import type WebTorrent from "webtorrent";
 import FirebaseService from "../Services/FirebaseService";
 import mime from "mime-types";
+import type { Instance } from "webtorrent";
 
 export default class TorrentsService {
   private readonly job: Job;
   private readonly dbPath: string;
-  private readonly client: any;
+  private readonly client: Instance;
+  private readonly torrent: WebTorrent.Torrent;
+  private readonly tempDir: string;
+  private readonly firebaseService: FirebaseService;
 
-  constructor(job: Job, dbPath: string) {
+  constructor(job: Job, dbPath: string, client: Instance) {
     this.job = job;
     this.dbPath = dbPath;
-    this.client = new WebTorrent();
+    this.client = client;
+    this.tempDir = mkdtempSync(path.join(os.tmpdir(), "niwder-tmp"));
+    this.torrent = this.client.add(job.data.url, {
+      path: this.tempDir,
+      destroyStoreOnDestroy: false,
+    });
+    this.firebaseService = new FirebaseService(this.job, this.dbPath);
   }
+
+  private recordMetadata = async () => {
+    if (!this.torrent.done) {
+      await this.firebaseService.recordTorrentsMetadata({
+        name: this.torrent.name,
+        magnetURI: this.job.data.url,
+        message: `Transferring from source`,
+        percentage: Math.round(this.torrent.progress * 100),
+        timeRemaining: isFinite(this.torrent.timeRemaining)
+          ? this.torrent.timeRemaining
+          : 0,
+        numPeers: this.torrent.numPeers,
+        downloadSpeed: this.torrent.downloadSpeed,
+        uploadSpeed: this.torrent.uploadSpeed,
+        length: isFinite(this.torrent.length) ? this.torrent.length : 0,
+        downloaded: this.torrent.downloaded,
+        uploaded: this.torrent.uploaded,
+      });
+    }
+  };
 
   public downloadToDisk = async (): Promise<FileObject> => {
     return new Promise<FileObject>(async (resolve, reject) => {
@@ -24,32 +54,21 @@ export default class TorrentsService {
         const url: string = this.job.data.url;
         console.log(`now downloading ${url}\n\n`);
 
-        let stopRecordTransferring: boolean = false;
+        this.torrent.on("infoHash", this.recordMetadata);
 
-        const firebaseService: FirebaseService = new FirebaseService(
-          this.job,
-          this.dbPath
-        );
+        this.torrent.on("noPeers", this.recordMetadata);
 
-        const tempDir: string = mkdtempSync(
-          path.join(os.tmpdir(), "niwder-tmp")
-        );
-
-        const torrent: WebTorrent.Torrent = this.client.add(url, {
-          path: tempDir,
-          destroyStoreOnDestroy: false,
-        });
-
-        torrent.on("error", (error: Error) => {
+        this.torrent.on("error", (error: Error) => {
           return reject(error);
         });
 
-        torrent.on("done", async () => {
-          let files: string[] = readdirSync(tempDir);
+        this.torrent.on("download", this.recordMetadata);
+
+        this.torrent.on("done", async () => {
+          let files: string[] = readdirSync(this.tempDir);
           if (files.length > 0) {
-            const filePath: string = path.join(tempDir, files[0]);
+            const filePath: string = path.join(this.tempDir, files[0]);
             await this.job.updateProgress(49);
-            stopRecordTransferring = true;
             return resolve({
               fileName: files[0],
               filePath: filePath,
@@ -64,16 +83,6 @@ export default class TorrentsService {
           }
         });
 
-        torrent.on("download", async () => {
-          if (!stopRecordTransferring) {
-            await firebaseService.recordTransferring({
-              name: torrent.name,
-              message: `Transferring from source`,
-              percentage: Math.round(torrent.progress * 100),
-            });
-          }
-        });
-
         this.client.on("error", (error: Error) => {
           return reject(error);
         });
@@ -83,13 +92,14 @@ export default class TorrentsService {
     });
   };
 
-  public destroyTorrentClient = (): Promise<void> => {
-    return new Promise<void>((resolve, reject) => {
-      this.client.destroy((error: Error) => {
+  public destroyTorrent = (): Promise<void> => {
+    return new Promise<void>(async (resolve, reject) => {
+      await this.firebaseService.removeTorrentMetadata();
+      this.torrent.destroy({}, (error: Error) => {
         if (error) {
           reject(error);
         } else {
-          console.log("Torrent client destroyed");
+          console.log("Torrent destroyed");
           resolve();
         }
       });

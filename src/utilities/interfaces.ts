@@ -37,6 +37,20 @@ export type TransferringData = {
   percentage: number;
 };
 
+export type TorrentsMetadata = {
+  name: string;
+  magnetURI: string;
+  message: string;
+  percentage: number;
+  timeRemaining: number;
+  numPeers: number;
+  downloadSpeed: number;
+  uploadSpeed: number;
+  length: number;
+  downloaded: number;
+  uploaded: number;
+};
+
 export type ExtendedParsedQs = {
   code?: string;
   error?: string;

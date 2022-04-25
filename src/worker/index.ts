@@ -87,7 +87,7 @@ worker.on("completed", (job: Job) => {
 });
 
 worker.on("drained", () => {
-  console.log(keys.MAIN_QUEUE, "drained");
+  console.log(keys.MAIN_QUEUE, "is empty");
 });
 
 worker.on("error", (error: Error) => {
@@ -108,6 +108,6 @@ worker.on("progress", (job: Job, progress: number) => {
 });
 
 process.on("SIGINT", async () => {
-  await worker.close();
+  await worker.close(true);
   process.exit(0);
 });

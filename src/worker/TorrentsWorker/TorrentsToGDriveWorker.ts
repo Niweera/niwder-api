@@ -7,14 +7,17 @@ import type { TransfersData } from "../../utilities/interfaces";
 import FirebaseService from "../Services/FirebaseService";
 import keys from "../../keys";
 import TorrentsService from "./TorrentsService";
+import type { Instance } from "webtorrent";
 
 export default class TorrentsToGDriveWorker {
   private readonly job: Job;
   private readonly dbPath: string;
+  private readonly client: Instance;
 
-  constructor(job: Job) {
+  constructor(job: Job, client: Instance) {
     this.job = job;
     this.dbPath = keys.TORRENTS_TO_GDRIVE_QUEUE;
+    this.client = client;
   }
 
   private sendFCMNotification = async (
@@ -31,7 +34,8 @@ export default class TorrentsToGDriveWorker {
     await this.job.updateProgress(0);
     const torrentsService: TorrentsService = new TorrentsService(
       this.job,
-      this.dbPath
+      this.dbPath,
+      this.client
     );
     const fileObject: FileObject = await torrentsService.downloadToDisk();
     const gDriveService: GDriveService = await GDriveService.build(
@@ -44,7 +48,7 @@ export default class TorrentsToGDriveWorker {
       fileObject.fileMimeType,
       fileObject.directory
     );
-    await torrentsService.destroyTorrentClient();
+    await torrentsService.destroyTorrent();
     const transfersData: TransfersData = {
       magnetLink: this.job.data.url,
       gDriveLink: driveLink,

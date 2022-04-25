@@ -5,7 +5,7 @@ import server from "./server";
 const { PORT } = Keys;
 
 server.listen(PORT, () => {
-  console.log(chalk.blue(`Sever listening on port ${PORT}`));
+  console.log(chalk.blue(`Niwder-API is listening on port ${PORT}`));
 });
 
 server.on("error", (err) => {

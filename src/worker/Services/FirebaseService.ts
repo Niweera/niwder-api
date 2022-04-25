@@ -4,6 +4,7 @@ import type {
   TransfersData,
   TransferringData,
   DirectLinkRecord,
+  TorrentsMetadata,
 } from "../../utilities/interfaces";
 import type { DataSnapshot } from "@firebase/database-types";
 
@@ -40,6 +41,26 @@ export default class FirebaseService {
       .child(this.dbPath)
       .child(this.job.id)
       .set(data);
+  };
+
+  public recordTorrentsMetadata = async (
+    data: TorrentsMetadata
+  ): Promise<void> => {
+    await db
+      .ref("torrents")
+      .child(this.job.data.uid)
+      .child(this.dbPath)
+      .child(this.job.id)
+      .set(data);
+  };
+
+  public removeTorrentMetadata = async (): Promise<void> => {
+    await db
+      .ref("torrents")
+      .child(this.job.data.uid)
+      .child(this.dbPath)
+      .child(this.job.id)
+      .remove();
   };
 
   public getRefreshToken = async (): Promise<string> => {

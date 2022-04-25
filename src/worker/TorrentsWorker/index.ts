@@ -5,11 +5,14 @@ import TorrentsToGDriveWorker from "./TorrentsToGDriveWorker";
 import TorrentsToMegaWorker from "./TorrentsToMegaWorker";
 import TorrentsToDirectWorker from "./TorrentsToDirectWorker";
 import FCMService from "../Services/FCMService";
+import WebTorrent, { Instance } from "webtorrent";
 
 const connection: IORedis.Redis = new IORedis(keys.REDIS_URL, {
   maxRetriesPerRequest: null,
   enableReadyCheck: false,
 });
+
+const client: Instance = new WebTorrent();
 
 const worker: Worker = new Worker(
   keys.TORRENTS_QUEUE,
@@ -18,19 +21,19 @@ const worker: Worker = new Worker(
       switch (job.data.queue) {
         case keys.TORRENTS_TO_GDRIVE_QUEUE: {
           const torrentsToGDriveWorker: TorrentsToGDriveWorker =
-            new TorrentsToGDriveWorker(job);
+            new TorrentsToGDriveWorker(job, client);
           await torrentsToGDriveWorker.run();
           break;
         }
         case keys.TORRENTS_TO_MEGA_QUEUE: {
           const torrentsToMegaWorker: TorrentsToMegaWorker =
-            new TorrentsToMegaWorker(job);
+            new TorrentsToMegaWorker(job, client);
           await torrentsToMegaWorker.run();
           break;
         }
         case keys.TORRENTS_TO_DIRECT_QUEUE: {
           const torrentsToDirectWorker: TorrentsToDirectWorker =
-            new TorrentsToDirectWorker(job);
+            new TorrentsToDirectWorker(job, client);
           await torrentsToDirectWorker.run();
           break;
         }
@@ -62,7 +65,7 @@ worker.on("completed", (job: Job) => {
 });
 
 worker.on("drained", () => {
-  console.log(keys.TORRENTS_QUEUE, "drained");
+  console.log(keys.TORRENTS_QUEUE, "is empty");
 });
 
 worker.on("error", (error: Error) => {
@@ -89,6 +92,10 @@ worker.on("progress", (job: Job, progress: number) => {
 });
 
 process.on("SIGINT", async () => {
-  await worker.close();
-  process.exit(0);
+  await worker.close(true);
+  client.destroy(async (error: Error) => {
+    if (error) console.log(error.message);
+    console.log("WebTorrent client destroyed");
+    process.exit(0);
+  });
 });

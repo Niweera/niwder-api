@@ -8,14 +8,17 @@ import keys from "../../keys";
 import TorrentsService from "./TorrentsService";
 import FileService from "../Services/FileService";
 import type { DirectLinkData } from "../../utilities/interfaces";
+import type { Instance } from "webtorrent";
 
 export default class TorrentsToDirectWorker {
   private readonly job: Job;
   private readonly dbPath: string;
+  private readonly client: Instance;
 
-  constructor(job: Job) {
+  constructor(job: Job, client: Instance) {
     this.job = job;
     this.dbPath = keys.TORRENTS_TO_DIRECT_QUEUE;
+    this.client = client;
   }
 
   private sendFCMNotification = async (
@@ -32,7 +35,8 @@ export default class TorrentsToDirectWorker {
     await this.job.updateProgress(0);
     const torrentsService: TorrentsService = new TorrentsService(
       this.job,
-      this.dbPath
+      this.dbPath,
+      this.client
     );
     const fileObject: FileObject = await torrentsService.downloadToDisk();
     const fileService: FileService = new FileService(this.job, this.dbPath);
@@ -43,7 +47,7 @@ export default class TorrentsToDirectWorker {
       fileObject.fileMimeType,
       fileObject.fileSize
     );
-    await torrentsService.destroyTorrentClient();
+    await torrentsService.destroyTorrent();
     const transfersData: TransfersData = {
       magnetLink: this.job.data.url,
       directLink: directLinkData.directLink,
