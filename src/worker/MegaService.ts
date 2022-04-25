@@ -41,7 +41,7 @@ export default class MegaService {
 
         megaCMD.on("close", (code) => {
           if (code === 0) {
-            return resolve(megaLink.split(" ")[2]);
+            return resolve(megaLink.split(" ").slice(-1).pop());
           } else {
             return reject(new Error(`MegaCMD exited with: ${code}`));
           }

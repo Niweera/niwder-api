@@ -7,12 +7,9 @@ import DirectToGDriveWorker from "./DirectToGDriveWorker";
 import DirectToMegaWorker from "./DirectToMegaWorker";
 import GDriveToDirectWorker from "./GDriveToDirectWorker";
 import MegaToDirectWorker from "./MegaToDirectWorker";
-import TorrentsToGDriveWorker from "./TorrentsToGDriveWorker";
-import TorrentsToMegaWorker from "./TorrentsToMegaWorker";
-import TorrentsToDirectWorker from "./TorrentsToDirectWorker";
 import FCMService from "./FCMService";
 
-const connection = new IORedis(keys.REDIS_URL, {
+const connection: IORedis.Redis = new IORedis(keys.REDIS_URL, {
   maxRetriesPerRequest: null,
   enableReadyCheck: false,
 });
@@ -60,24 +57,6 @@ const worker: Worker = new Worker(
             job
           );
           await megaToDirectWorker.run();
-          break;
-        }
-        case keys.TORRENTS_TO_GDRIVE_QUEUE: {
-          const torrentsToGDriveWorker: TorrentsToGDriveWorker =
-            new TorrentsToGDriveWorker(job);
-          await torrentsToGDriveWorker.run();
-          break;
-        }
-        case keys.TORRENTS_TO_MEGA_QUEUE: {
-          const torrentsToMegaWorker: TorrentsToMegaWorker =
-            new TorrentsToMegaWorker(job);
-          await torrentsToMegaWorker.run();
-          break;
-        }
-        case keys.TORRENTS_TO_DIRECT_QUEUE: {
-          const torrentsToDirectWorker: TorrentsToDirectWorker =
-            new TorrentsToDirectWorker(job);
-          await torrentsToDirectWorker.run();
           break;
         }
         default: {

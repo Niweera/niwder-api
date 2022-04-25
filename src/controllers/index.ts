@@ -164,7 +164,7 @@ router.post(
   `/api/${keys.TORRENTS_TO_GDRIVE_QUEUE}`,
   [routeAuth(), validator("Main", "magnet")],
   asyncWrapper(async (req: Request, res: Response): Promise<any> => {
-    await service.serve(
+    await service.queueTorrents(
       req.body.url,
       req.authenticatedUser.user_id,
       keys.TORRENTS_TO_GDRIVE_QUEUE
@@ -181,7 +181,7 @@ router.post(
   `/api/${keys.TORRENTS_TO_MEGA_QUEUE}`,
   [routeAuth(), validator("Main", "magnet")],
   asyncWrapper(async (req: Request, res: Response): Promise<any> => {
-    await service.serve(
+    await service.queueTorrents(
       req.body.url,
       req.authenticatedUser.user_id,
       keys.TORRENTS_TO_MEGA_QUEUE
@@ -198,7 +198,7 @@ router.post(
   `/api/${keys.TORRENTS_TO_DIRECT_QUEUE}`,
   [routeAuth(), validator("Main", "magnet")],
   asyncWrapper(async (req: Request, res: Response): Promise<any> => {
-    await service.serve(
+    await service.queueTorrents(
       req.body.url,
       req.authenticatedUser.user_id,
       keys.TORRENTS_TO_DIRECT_QUEUE

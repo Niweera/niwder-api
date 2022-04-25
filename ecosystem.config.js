@@ -1,15 +1,22 @@
 module.exports = {
   apps: [
     {
-      name: "niwder-api",
+      name: "na",
       script: "./dist/src/index.js",
       args: ["--color"],
       instances: "max",
       exec_mode: "cluster",
     },
     {
-      name: "niwder-worker",
+      name: "nw",
       script: "./dist/src/worker/index.js",
+      args: ["--color"],
+      instances: "max",
+      exec_mode: "cluster",
+    },
+    {
+      name: "ntw",
+      script: "./dist/src/worker/TorrentsWorker/index.js",
       args: ["--color"],
       instances: "max",
       exec_mode: "cluster",

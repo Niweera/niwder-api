@@ -8,6 +8,7 @@ export default {
   FIREBASE_API_KEY: process.env.FIREBASE_API_KEY,
   REDIS_URL: process.env.REDIS_URL,
   MAIN_QUEUE: "main-queue",
+  TORRENTS_QUEUE: "torrents-queue",
   MEGA_TO_GDRIVE_QUEUE: "mega-to-gdrive",
   GDRIVE_TO_MEGA_QUEUE: "gdrive-to-mega",
   DIRECT_TO_GDRIVE_QUEUE: "direct-to-gdrive",

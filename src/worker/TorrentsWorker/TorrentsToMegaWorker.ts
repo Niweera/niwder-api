@@ -1,20 +1,20 @@
 import type { Job } from "bullmq";
 import { ServerValue } from "firebase-admin/database";
-import GDriveService from "./GDriveService";
-import type { FileObject } from "../utilities/interfaces";
-import FCMService from "./FCMService";
-import type { TransfersData } from "../utilities/interfaces";
-import FirebaseService from "./FirebaseService";
-import keys from "../keys";
+import type { FileObject } from "../../utilities/interfaces";
+import FCMService from "../FCMService";
+import type { TransfersData } from "../../utilities/interfaces";
+import FirebaseService from "../FirebaseService";
+import keys from "../../keys";
 import TorrentsService from "./TorrentsService";
+import MegaService from "../MegaService";
 
-export default class TorrentsToGDriveWorker {
+export default class TorrentsToMegaWorker {
   private readonly job: Job;
   private readonly dbPath: string;
 
   constructor(job: Job) {
     this.job = job;
-    this.dbPath = keys.TORRENTS_TO_GDRIVE_QUEUE;
+    this.dbPath = keys.TORRENTS_TO_MEGA_QUEUE;
   }
 
   private sendFCMNotification = async (
@@ -34,20 +34,15 @@ export default class TorrentsToGDriveWorker {
       this.dbPath
     );
     const fileObject: FileObject = await torrentsService.downloadToDisk();
-    const gDriveService: GDriveService = await GDriveService.build(
-      this.job,
-      this.dbPath
-    );
-    const driveLink: string = await gDriveService.uploadToGDrive(
+    const megaService: MegaService = new MegaService(this.job, this.dbPath);
+    const megaLink: string = await megaService.uploadToMega(
       fileObject.fileName,
-      fileObject.filePath,
-      fileObject.fileMimeType,
-      fileObject.directory
+      fileObject.filePath
     );
     await torrentsService.destroyTorrentClient();
     const transfersData: TransfersData = {
       magnetLink: this.job.data.url,
-      gDriveLink: driveLink,
+      megaLink: megaLink,
       timestamp: ServerValue.TIMESTAMP,
       name: fileObject.fileName,
       size: fileObject.fileSize,
@@ -60,6 +55,6 @@ export default class TorrentsToGDriveWorker {
       this.dbPath
     );
     await firebaseService.recordDownloadURL(transfersData);
-    await this.sendFCMNotification(fileObject.fileName, driveLink);
+    await this.sendFCMNotification(fileObject.fileName, megaLink);
   };
 }
