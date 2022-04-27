@@ -18,7 +18,7 @@ module.exports = {
       name: "ntw",
       script: "./dist/src/worker/TorrentsWorker/index.js",
       args: ["--color"],
-      instances: "max",
+      instances: "1",
       exec_mode: "cluster",
     },
   ],

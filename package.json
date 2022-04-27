@@ -21,6 +21,7 @@
   "devDependencies": {
     "@types/cors": "^2.8.12",
     "@types/express": "^4.17.13",
+    "@types/get-folder-size": "^3.0.1",
     "@types/ioredis": "^4.28.10",
     "@types/jest": "^27.4.1",
     "@types/mime-types": "^2.1.1",
@@ -52,6 +53,7 @@
     "express": "^4.17.3",
     "firebase-admin": "^10.0.2",
     "firebase-auth-express-middleware": "^1.0.8",
+    "get-folder-size": "^3.1.0",
     "googleapis": "^98.0.0",
     "helmet": "^5.0.2",
     "ioredis": "^4.28.5",

@@ -29,23 +29,29 @@ export default class TorrentsService {
   }
 
   private recordMetadata = async () => {
-    if (!this.torrent.done) {
-      await this.firebaseService.recordTorrentsMetadata({
-        name: this.torrent.name,
-        magnetURI: this.job.data.url,
-        message: `Transferring from source`,
-        percentage: Math.round(this.torrent.progress * 100),
-        timeRemaining: isFinite(this.torrent.timeRemaining)
-          ? this.torrent.timeRemaining
-          : 0,
-        numPeers: this.torrent.numPeers,
-        downloadSpeed: this.torrent.downloadSpeed,
-        uploadSpeed: this.torrent.uploadSpeed,
-        length: isFinite(this.torrent.length) ? this.torrent.length : 0,
-        downloaded: this.torrent.downloaded,
-        uploaded: this.torrent.uploaded,
-      });
-    }
+    await this.firebaseService.recordTorrentsMetadata({
+      name: Boolean(this.torrent.name) ? this.torrent.name : "torrent.file",
+      magnetURI: this.job.data.url,
+      message: `Transferring from source`,
+      percentage: Math.round(
+        (isFinite(this.torrent.progress) ? this.torrent.progress : 0) * 100
+      ),
+      timeRemaining: isFinite(this.torrent.timeRemaining)
+        ? this.torrent.timeRemaining
+        : 0,
+      numPeers: isFinite(this.torrent.numPeers) ? this.torrent.numPeers : 0,
+      downloadSpeed: isFinite(this.torrent.downloadSpeed)
+        ? this.torrent.downloadSpeed
+        : 0,
+      uploadSpeed: isFinite(this.torrent.uploadSpeed)
+        ? this.torrent.uploadSpeed
+        : 0,
+      length: isFinite(this.torrent.length) ? this.torrent.length : 0,
+      downloaded: isFinite(this.torrent.downloaded)
+        ? this.torrent.downloaded
+        : 0,
+      uploaded: isFinite(this.torrent.uploaded) ? this.torrent.uploaded : 0,
+    });
   };
 
   public downloadToDisk = async (): Promise<FileObject> => {
@@ -55,27 +61,36 @@ export default class TorrentsService {
         console.log(`now downloading ${url}\n\n`);
 
         this.torrent.on("infoHash", this.recordMetadata);
-
-        this.torrent.on("noPeers", this.recordMetadata);
+        const intervalObj = setInterval(this.recordMetadata, 5000);
 
         this.torrent.on("error", (error: Error) => {
           return reject(error);
         });
 
-        this.torrent.on("download", this.recordMetadata);
+        this.torrent.on("download", () => {
+          console.log(
+            `\x1b[A\x1b[G\x1b[2K${this.torrent.name}: ${Math.round(
+              this.torrent.progress * 100
+            )}%`
+          );
+        });
 
         this.torrent.on("done", async () => {
           let files: string[] = readdirSync(this.tempDir);
           if (files.length > 0) {
             const filePath: string = path.join(this.tempDir, files[0]);
+
+            clearInterval(intervalObj);
+            await this.recordMetadata();
             await this.job.updateProgress(49);
+
             return resolve({
               fileName: files[0],
               filePath: filePath,
               fileMimeType: statSync(filePath).isDirectory()
                 ? "inode/directory"
                 : mime.lookup(filePath) || "application/octet-stream",
-              fileSize: statSync(filePath).size,
+              fileSize: isFinite(this.torrent.length) ? this.torrent.length : 0,
               directory: statSync(filePath).isDirectory(),
             });
           } else {
