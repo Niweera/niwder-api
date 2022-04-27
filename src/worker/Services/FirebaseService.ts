@@ -17,6 +17,15 @@ export default class FirebaseService {
     this.dbPath = dbPath;
   }
 
+  public removeTransferring = async () => {
+    await db
+      .ref("transferring")
+      .child(this.job.data.uid)
+      .child(this.dbPath)
+      .child(this.job.id)
+      .remove();
+  };
+
   public recordDownloadURL = async (data: TransfersData): Promise<void> => {
     await db
       .ref("transfers")
@@ -24,13 +33,7 @@ export default class FirebaseService {
       .child(this.dbPath)
       .push(data);
 
-    await db
-      .ref("transferring")
-      .child(this.job.data.uid)
-      .child(this.dbPath)
-      .child(this.job.id)
-      .remove();
-
+    await this.removeTransferring();
     await this.job.updateProgress(99);
   };
 
@@ -54,9 +57,18 @@ export default class FirebaseService {
       .set(data);
   };
 
-  public removeTorrentMetadata = async (): Promise<void> => {
+  public removeTorrentsMetadata = async (): Promise<void> => {
     await db
       .ref("torrents")
+      .child(this.job.data.uid)
+      .child(this.dbPath)
+      .child(this.job.id)
+      .remove();
+  };
+
+  public removeRMTorrentsData = async (): Promise<void> => {
+    await db
+      .ref("removeTorrents")
       .child(this.job.data.uid)
       .child(this.dbPath)
       .child(this.job.id)

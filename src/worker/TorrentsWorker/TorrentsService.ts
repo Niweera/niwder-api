@@ -15,6 +15,7 @@ export default class TorrentsService {
   private readonly torrent: WebTorrent.Torrent;
   private readonly tempDir: string;
   private readonly firebaseService: FirebaseService;
+  private intervalObj: ReturnType<typeof setInterval>;
 
   constructor(job: Job, dbPath: string, client: Instance) {
     this.job = job;
@@ -26,6 +27,7 @@ export default class TorrentsService {
       destroyStoreOnDestroy: false,
     });
     this.firebaseService = new FirebaseService(this.job, this.dbPath);
+    this.intervalObj = null;
   }
 
   private recordMetadata = async () => {
@@ -54,6 +56,27 @@ export default class TorrentsService {
     });
   };
 
+  private logTorrentsData =
+    (event: string): (() => void) =>
+    () => {
+      console.log("\n");
+      console.log("name", this.torrent.name);
+      console.log("event", event);
+      console.log(
+        "progress",
+        Math.round((this.torrent.progress || 0) * 100),
+        "%"
+      );
+      console.log("timeRemaining", this.torrent.timeRemaining);
+      console.log("numPeers", this.torrent.numPeers);
+      console.log("downloadSpeed", this.torrent.downloadSpeed);
+      console.log("uploadSpeed", this.torrent.uploadSpeed);
+      console.log("length", this.torrent.length);
+      console.log("downloaded", this.torrent.downloaded);
+      console.log("uploaded", this.torrent.uploaded);
+      console.log("\n");
+    };
+
   public downloadToDisk = async (): Promise<FileObject> => {
     return new Promise<FileObject>(async (resolve, reject) => {
       try {
@@ -61,7 +84,10 @@ export default class TorrentsService {
         console.log(`now downloading ${url}\n\n`);
 
         this.torrent.on("infoHash", this.recordMetadata);
-        const intervalObj = setInterval(this.recordMetadata, 5000);
+        this.torrent.on("metadata", this.logTorrentsData("metadata"));
+        this.torrent.on("ready", this.logTorrentsData("ready"));
+
+        this.intervalObj = setInterval(this.recordMetadata, 5000);
 
         this.torrent.on("error", (error: Error) => {
           return reject(error);
@@ -80,7 +106,8 @@ export default class TorrentsService {
           if (files.length > 0) {
             const filePath: string = path.join(this.tempDir, files[0]);
 
-            clearInterval(intervalObj);
+            if (this.intervalObj) clearInterval(this.intervalObj);
+
             await this.recordMetadata();
             await this.job.updateProgress(49);
 
@@ -109,7 +136,9 @@ export default class TorrentsService {
 
   public destroyTorrent = (): Promise<void> => {
     return new Promise<void>(async (resolve, reject) => {
-      await this.firebaseService.removeTorrentMetadata();
+      if (this.intervalObj) clearInterval(this.intervalObj);
+      await this.firebaseService.removeTorrentsMetadata();
+      await this.firebaseService.removeRMTorrentsData();
       this.torrent.destroy({}, (error: Error) => {
         if (error) {
           reject(error);

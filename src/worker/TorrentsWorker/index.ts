@@ -6,6 +6,7 @@ import TorrentsToMegaWorker from "./TorrentsToMegaWorker";
 import TorrentsToDirectWorker from "./TorrentsToDirectWorker";
 import FCMService from "../Services/FCMService";
 import WebTorrent, { Instance } from "webtorrent";
+import FirebaseService from "../Services/FirebaseService";
 
 const connection: IORedis.Redis = new IORedis(keys.REDIS_URL, {
   maxRetriesPerRequest: null,
@@ -78,6 +79,13 @@ worker.on("failed", async (job: Job, error: Error) => {
     job: job.data.url,
     error: error.message,
   });
+
+  const firebaseService: FirebaseService = new FirebaseService(
+    job,
+    job.data.queue
+  );
+  await firebaseService.removeTransferring();
+
   console.log(
     keys.TORRENTS_QUEUE,
     job.name,
@@ -88,7 +96,7 @@ worker.on("failed", async (job: Job, error: Error) => {
 });
 
 worker.on("progress", (job: Job, progress: number) => {
-  console.log(keys.TORRENTS_QUEUE, job.name, job.data.url, progress);
+  console.log(keys.TORRENTS_QUEUE, job.name, progress);
 });
 
 process.on("SIGINT", async () => {
