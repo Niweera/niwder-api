@@ -2,6 +2,8 @@ import keys from "../keys";
 import IORedis from "ioredis";
 import { Job, Queue } from "bullmq";
 import { createHash } from "crypto";
+import parseTorrent from "parse-torrent";
+import type MagnetUri from "magnet-uri";
 
 const connection: IORedis.Redis = new IORedis(keys.REDIS_URL, {
   maxRetriesPerRequest: null,
@@ -46,14 +48,22 @@ export default class Service {
     console.log(`job added [${job.name}] [${url}]`);
   };
 
+  private torrentToMagnet = (
+    torrent: Express.Multer.File
+  ): ReturnType<typeof MagnetUri.encode> => {
+    const parsedTorrent: MagnetUri.Instance = parseTorrent(torrent.buffer);
+    return parseTorrent.toMagnetURI(parsedTorrent);
+  };
+
   queueTorrents = async (
     url: string,
     uid: string,
     queueName: string,
+    torrent?: Express.Multer.File,
     kwargs?: Record<string, any>
   ): Promise<void> => {
     const job: Job = await this.queueJob(
-      `${url}`,
+      `${torrent ? this.torrentToMagnet(torrent) : url}`,
       uid,
       torrentsQueue,
       queueName,

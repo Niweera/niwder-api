@@ -7,6 +7,7 @@ import OAuthService from "../services/OAuthService";
 import keys from "../keys";
 import fileController from "./fileController";
 import oAuthController from "./oAuthController";
+import upload from "../middleware/multer-middleware";
 
 const router: Router = Router();
 const service: Service = new Service();
@@ -162,12 +163,13 @@ router.post(
  */
 router.post(
   `/api/${keys.TORRENTS_TO_GDRIVE_QUEUE}`,
-  [routeAuth(), validator("Main", "magnet")],
+  [routeAuth(), validator("Main", "magnet"), upload.single("torrent")],
   asyncWrapper(async (req: Request, res: Response): Promise<any> => {
     await service.queueTorrents(
       req.body.url,
       req.authenticatedUser.user_id,
-      keys.TORRENTS_TO_GDRIVE_QUEUE
+      keys.TORRENTS_TO_GDRIVE_QUEUE,
+      req.file
     );
     res.sendStatus(204);
   })
@@ -179,12 +181,13 @@ router.post(
  */
 router.post(
   `/api/${keys.TORRENTS_TO_MEGA_QUEUE}`,
-  [routeAuth(), validator("Main", "magnet")],
+  [routeAuth(), validator("Main", "magnet"), upload.single("torrent")],
   asyncWrapper(async (req: Request, res: Response): Promise<any> => {
     await service.queueTorrents(
       req.body.url,
       req.authenticatedUser.user_id,
-      keys.TORRENTS_TO_MEGA_QUEUE
+      keys.TORRENTS_TO_MEGA_QUEUE,
+      req.file
     );
     res.sendStatus(204);
   })
@@ -196,12 +199,13 @@ router.post(
  */
 router.post(
   `/api/${keys.TORRENTS_TO_DIRECT_QUEUE}`,
-  [routeAuth(), validator("Main", "magnet")],
+  [routeAuth(), validator("Main", "magnet"), upload.single("torrent")],
   asyncWrapper(async (req: Request, res: Response): Promise<any> => {
     await service.queueTorrents(
       req.body.url,
       req.authenticatedUser.user_id,
-      keys.TORRENTS_TO_DIRECT_QUEUE
+      keys.TORRENTS_TO_DIRECT_QUEUE,
+      req.file
     );
     res.sendStatus(204);
   })
