@@ -20,6 +20,10 @@ Niwder-UI and Niwder-API use [Firebase](https://firebase.google.com/) for hostin
 
 ![image](assets/ui.jpg)
 
+**This project uses [WebTorrent](https://github.com/webtorrent/webtorrent) for torrents transferring.**
+
+![image](assets/torrents-download-demo.gif)
+
 ### Setting up Niwder-API
 
 1. Install Mega-CMD (this will be automatically done by `postinstall` script).
@@ -47,7 +51,7 @@ New features to keep an eye on;
 - [x] Torrents to Mega.nz link
 - [x] Torrents to direct download link
 
-This project uses [WebTorrent](https://github.com/webtorrent/webtorrent).
+
 
 Niwder-API is live on https://niwder-api.niweera.gq. <br/>
 Niwder is live on https://niwder.niweera.gq.

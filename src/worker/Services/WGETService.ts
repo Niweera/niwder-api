@@ -28,6 +28,7 @@ export default class WGETService {
         );
 
         const percentageRe: RegExp = new RegExp(/.*\s(\d*)%.*/g);
+        const fileNameRe: RegExp = new RegExp(/\s(.*)\s.*?\[.*/g);
 
         const tempDir: string = mkdtempSync(
           path.join(os.tmpdir(), "niwder-tmp")
@@ -51,9 +52,10 @@ export default class WGETService {
           const percentage: string = data
             .toString()
             .replace(percentageRe, "$1");
+          const wgetName: string = data.toString().replace(fileNameRe, "$1");
           if (Boolean(parseInt(percentage))) {
             await firebaseService.recordTransferring({
-              name: "tmp.file",
+              name: Boolean(wgetName) ? wgetName : "tmp.file",
               message: `Transferring from source`,
               percentage: parseInt(percentage),
             });
