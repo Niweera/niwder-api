@@ -22,8 +22,9 @@ fileController.get(
           if (!res.headersSent) {
             res.sendStatus(500);
           }
-          console.log(err);
+          console.log("[-] fileController", err.message);
         }
+        res.end();
       });
     } else {
       res.status(404).send({
