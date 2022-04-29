@@ -24,6 +24,8 @@ Niwder-UI and Niwder-API use [Firebase](https://firebase.google.com/) for hostin
 
 ![image](assets/torrents-download-demo.gif)
 
+This project uses source code from [checker.openwebtorrent.com](https://github.com/OpenWebTorrent/checker.openwebtorrent.com) by [OpenWebTorrent](https://github.com/OpenWebTorrent).
+
 ### Setting up Niwder-API
 
 1. Install Mega-CMD (this will be automatically done by `postinstall` script).

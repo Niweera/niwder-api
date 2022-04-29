@@ -49,6 +49,12 @@ export type TorrentsMetadata = {
   length: number;
   downloaded: number;
   uploaded: number;
+  btPeers: number;
+  btSeeders: number;
+  btTrackers: number;
+  wtPeers: number;
+  wtSeeders: number;
+  wtTrackers: number;
 };
 
 export type ExtendedParsedQs = {
@@ -83,4 +89,15 @@ export type ServeFileObject = {
 export type FCMDataPayload = {
   job: string;
   error: string;
+};
+
+type TorrentHealth = {
+  num_trackers: number;
+  seeders: number;
+  peers: number;
+};
+
+export type TorrentsHealth = {
+  webtorrent: TorrentHealth;
+  bittorrent: TorrentHealth;
 };

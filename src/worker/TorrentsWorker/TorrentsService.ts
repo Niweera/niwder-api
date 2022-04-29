@@ -7,6 +7,8 @@ import type WebTorrent from "webtorrent";
 import FirebaseService from "../Services/FirebaseService";
 import mime from "mime-types";
 import type { Instance } from "webtorrent";
+import TorrentsHealthService from "./TorrentsHealthService";
+import type { TorrentsHealth } from "../../utilities/interfaces";
 
 export default class TorrentsService {
   private readonly job: Job;
@@ -16,6 +18,8 @@ export default class TorrentsService {
   private readonly tempDir: string;
   private readonly firebaseService: FirebaseService;
   private intervalObj: ReturnType<typeof setInterval>;
+  private intervalObjTwo: ReturnType<typeof setInterval>;
+  private torrentsHealth: TorrentsHealth;
 
   constructor(job: Job, dbPath: string, client: Instance) {
     this.job = job;
@@ -28,7 +32,15 @@ export default class TorrentsService {
     });
     this.firebaseService = new FirebaseService(this.job, this.dbPath);
     this.intervalObj = null;
+    this.intervalObjTwo = null;
+    this.torrentsHealth = null;
   }
+
+  private setTorrentsHealth = async () => {
+    this.torrentsHealth = await TorrentsHealthService.getTorrentsHealth(
+      this.job.data.url
+    );
+  };
 
   private recordMetadata = async () => {
     await this.firebaseService.recordTorrentsMetadata({
@@ -53,6 +65,24 @@ export default class TorrentsService {
         ? this.torrent.downloaded
         : 0,
       uploaded: isFinite(this.torrent.uploaded) ? this.torrent.uploaded : 0,
+      btPeers: Boolean(this.torrentsHealth)
+        ? this.torrentsHealth.bittorrent.peers
+        : 0,
+      btSeeders: Boolean(this.torrentsHealth)
+        ? this.torrentsHealth.bittorrent.seeders
+        : 0,
+      btTrackers: Boolean(this.torrentsHealth)
+        ? this.torrentsHealth.bittorrent.num_trackers
+        : 0,
+      wtPeers: Boolean(this.torrentsHealth)
+        ? this.torrentsHealth.webtorrent.peers
+        : 0,
+      wtSeeders: Boolean(this.torrentsHealth)
+        ? this.torrentsHealth.webtorrent.seeders
+        : 0,
+      wtTrackers: Boolean(this.torrentsHealth)
+        ? this.torrentsHealth.webtorrent.num_trackers
+        : 0,
     });
   };
 
@@ -88,6 +118,7 @@ export default class TorrentsService {
         this.torrent.on("ready", this.logTorrentsData("ready"));
 
         this.intervalObj = setInterval(this.recordMetadata, 5000);
+        this.intervalObjTwo = setInterval(this.setTorrentsHealth, 5000);
 
         this.torrent.on("error", (error: Error) => {
           return reject(error);
@@ -107,6 +138,7 @@ export default class TorrentsService {
             const filePath: string = path.join(this.tempDir, files[0]);
 
             if (this.intervalObj) clearInterval(this.intervalObj);
+            if (this.intervalObjTwo) clearInterval(this.intervalObjTwo);
 
             await this.recordMetadata();
             await this.job.updateProgress(49);
@@ -137,6 +169,8 @@ export default class TorrentsService {
   public destroyTorrent = (): Promise<void> => {
     return new Promise<void>(async (resolve, reject) => {
       if (this.intervalObj) clearInterval(this.intervalObj);
+      if (this.intervalObjTwo) clearInterval(this.intervalObjTwo);
+
       await this.firebaseService.removeTorrentsMetadata();
       await this.firebaseService.removeRMTorrentsData();
       this.torrent.destroy({}, (error: Error) => {
