@@ -52,4 +52,25 @@ export default class FirebaseService {
       return null;
     }
   };
+
+  public static setServerAlive = (): ReturnType<typeof setInterval> => {
+    return setInterval(async () => {
+      try {
+        await db.ref("live").set(true);
+      } catch (e) {
+        console.log(e.message);
+      }
+    }, 5000);
+  };
+
+  public static setServerDead = async (
+    interval: ReturnType<typeof setInterval>
+  ) => {
+    try {
+      await db.ref("live").set(false);
+      if (interval) clearInterval(interval);
+    } catch (e) {
+      console.log(e.message);
+    }
+  };
 }
