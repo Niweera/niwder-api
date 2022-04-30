@@ -13,18 +13,6 @@ const router: Router = Router();
 const service: Service = new Service();
 const oAuthService: OAuthService = new OAuthService();
 
-/** @route   GET /api
- *  @desc    Check API status
- *  @access  Private
- */
-router.get(
-  "/api",
-  routeAuth(),
-  asyncWrapper(async (req: Request, res: Response): Promise<any> => {
-    res.sendStatus(204);
-  })
-);
-
 /** @route   GET /api/oauth
  *  @desc    Redirect user for OAuth2
  *  @access  Private
