@@ -42,6 +42,8 @@ GOOGLE_DRIVE_CLIENT_ID=<string>
 GOOGLE_DRIVE_CLIENT_SECRET=<string>
 ```
 
+#### Niwder API Specification (OpenAPI v3) is online and can be viewed from [here](https://niwder-api.niweera.gq/api/docs).
+
 New features to keep an eye on;
 
 - [x] Google Drive link to Mega.nz link

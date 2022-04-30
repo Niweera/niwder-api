@@ -9,6 +9,7 @@ import {
 } from "../controllers";
 import ErrorHandlingMiddleware from "../middleware/error-handling";
 import FirebaseAuthMiddleware from "../middleware/firebaser";
+import ServeOpenAPI from "../openapi";
 
 export const app: Application = express();
 app.disable("x-powered-by");
@@ -16,6 +17,7 @@ app.disable("x-powered-by");
 const server: Server = http.createServer(app);
 
 Middleware(app);
+ServeOpenAPI(app);
 app.use("/api/oauth/callback", oAuthController);
 app.use("/api/file", fileController);
 FirebaseAuthMiddleware(app);
