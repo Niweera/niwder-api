@@ -1,0 +1,704 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Niwder API Documentation",
+    "description": "The API Specification of [Niwder-API](https://niwder-api.niweera.gq). Visit [Niwder](https://niwder.niweera.gq) for more information on the Niwder platform.",
+    "termsOfService": "https://niwder.niweera.gq/terms-of-service",
+    "contact": {
+      "name": "Nipuna Weerasekara",
+      "url": "https://niweera.gq",
+      "email": "w.nipuna@gmail.com"
+    },
+    "license": {
+      "name": "Apache 2.0",
+      "url": "https://www.apache.org/licenses/LICENSE-2.0.html"
+    },
+    "version": "0.0.1"
+  },
+  "servers": [
+    {
+      "url": "https://niwder-api.niweera.gq",
+      "description": "Production Server"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Authorization",
+      "description": "oAuth authentication routes"
+    },
+    {
+      "name": "Files",
+      "description": "Route serving files"
+    },
+    {
+      "name": "Transfers",
+      "description": "Routes for queueing transfers"
+    }
+  ],
+  "security": [
+    {
+      "bearerAuth": []
+    }
+  ],
+  "paths": {
+    "/api/docs": {
+      "get": {
+        "operationId": "getAPIDocs",
+        "responses": {
+          "200": {
+            "description": "Serve OpenAPI Specification",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "message": "Internal Server Error"
+                }
+              }
+            }
+          }
+        },
+        "security": []
+      }
+    },
+    "/api/oauth/callback": {
+      "get": {
+        "operationId": "getOAuthCallback",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "code",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Code returned from Google oAuth",
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "state",
+            "schema": {
+              "type": "string"
+            },
+            "description": "UID returned as state",
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "error",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Optional error string returned from Google oAuth"
+          }
+        ],
+        "tags": ["Authorization"],
+        "responses": {
+          "302": {
+            "description": "Redirect to oAuth Callback URL"
+          }
+        },
+        "security": []
+      }
+    },
+    "/api/file/{fileID}": {
+      "get": {
+        "operationId": "getAPIFile",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "fileID",
+            "schema": {
+              "type": "string"
+            },
+            "description": "File ID",
+            "required": true
+          }
+        ],
+        "tags": ["Files"],
+        "responses": {
+          "200": {
+            "description": "File is served as specified in the fileID",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "description": "File is served as a binary",
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            },
+            "headers": {
+              "Content-Disposition": {
+                "schema": {
+                  "type": "string",
+                  "description": "File is served as a binary",
+                  "example": "attachment; filename=\"name.extension\""
+                }
+              }
+            }
+          }
+        },
+        "security": []
+      }
+    },
+    "/api/oauth": {
+      "get": {
+        "tags": ["Authorization"],
+        "operationId": "getAPIOAuth",
+        "responses": {
+          "200": {
+            "description": "Redirect to Google oAuth URL",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIOAuthResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "message": "Internal Server Error"
+                }
+              }
+            }
+          }
+        },
+        "security": []
+      },
+      "delete": {
+        "tags": ["Authorization"],
+        "operationId": "deleteAPIOAuth",
+        "responses": {
+          "200": {
+            "description": "Redirect to Google oAuth permissions page",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeleteAPIOAuthResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "message": "Internal Server Error"
+                }
+              }
+            }
+          }
+        },
+        "security": []
+      }
+    },
+    "/api/mega-to-gdrive": {
+      "post": {
+        "tags": ["Transfers"],
+        "operationId": "postMegaToGDrive",
+        "requestBody": {
+          "description": "URL for the transfer job",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MegaURL"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Transfer from Mega.nz to Google Drive"
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "message": "Internal Server Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/gdrive-to-mega": {
+      "post": {
+        "tags": ["Transfers"],
+        "operationId": "postGDriveToMega",
+        "requestBody": {
+          "description": "URL for the transfer job",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GDriveURL"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Transfer from Google Drive to Mega"
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "message": "Internal Server Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/direct-to-gdrive": {
+      "post": {
+        "tags": ["Transfers"],
+        "operationId": "postDirectToGDrive",
+        "requestBody": {
+          "description": "URL for the transfer job",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DirectURL"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Transfer from direct links to Google Drive"
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "message": "Internal Server Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/direct-to-mega": {
+      "post": {
+        "tags": ["Transfers"],
+        "operationId": "postDirectToMega",
+        "requestBody": {
+          "description": "URL for the transfer job",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DirectURL"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Transfer from direct links to Mega.nz"
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "message": "Internal Server Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/gdrive-to-direct": {
+      "post": {
+        "tags": ["Transfers"],
+        "operationId": "postGDriveToDirect",
+        "requestBody": {
+          "description": "URL for the transfer job",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GDriveURL"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Transfer from Google Drive to direct links"
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "message": "Internal Server Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/mega-to-direct": {
+      "post": {
+        "tags": ["Transfers"],
+        "operationId": "postMegaToDirect",
+        "requestBody": {
+          "description": "URL for the transfer job",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MegaURL"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Transfer from Mega.nz to direct links"
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "message": "Internal Server Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/torrents-to-gdrive": {
+      "post": {
+        "tags": ["Transfers"],
+        "operationId": "postTorrentsToGDrive",
+        "requestBody": {
+          "description": "URL for the transfer job",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MagnetURL"
+              }
+            },
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/TorrentFile"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Transfer from torrents to Google Drive"
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "message": "Internal Server Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/torrents-to-mega": {
+      "post": {
+        "tags": ["Transfers"],
+        "operationId": "postTorrentsToMega",
+        "requestBody": {
+          "description": "URL for the transfer job",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MagnetURL"
+              }
+            },
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/TorrentFile"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Transfer from torrents to Mega.nz"
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "message": "Internal Server Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/torrents-to-direct": {
+      "post": {
+        "tags": ["Transfers"],
+        "operationId": "postTorrentsToDirect",
+        "requestBody": {
+          "description": "URL for the transfer job",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MagnetURL"
+              }
+            },
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/TorrentFile"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Transfer from torrents to direct link"
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "message": "Internal Server Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "Firebase Authentication JWT token is required",
+        "bearerFormat": "JWT"
+      }
+    },
+    "schemas": {
+      "Error": {
+        "description": "Error message object",
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string"
+          }
+        },
+        "example": {
+          "message": "Internal Server Error"
+        }
+      },
+      "APIOAuthResponse": {
+        "description": "oAuth redirection URL",
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string"
+          }
+        },
+        "example": {
+          "url": "<Google oAuth redirection URL>"
+        }
+      },
+      "DeleteAPIOAuthResponse": {
+        "description": "oAuth redirection URL",
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string"
+          }
+        },
+        "example": {
+          "url": "https://myaccount.google.com/u/0/permissions?pageId=none"
+        }
+      },
+      "MegaURL": {
+        "description": "Mega.nz URL",
+        "type": "object",
+        "required": ["url"],
+        "properties": {
+          "url": {
+            "type": "string",
+            "pattern": "(^https:\\/\\/mega\\.nz\\/file\\/[a-zA-Z0-9]{0,8}#[a-zA-Z0-9_-]+$|^https:\\/\\/mega\\.nz\\/folder\\/[a-zA-Z0-9]{0,8}#[a-zA-Z0-9_-]+$|^https:\\/\\/mega\\.nz\\/folder\\/[a-zA-Z0-9]{0,8}#[a-zA-Z0-9_-]+\\/folder\\/[a-zA-Z0-9]{0,8}$|^https:\\/\\/mega\\.nz\\/folder\\/[a-zA-Z0-9]{0,8}#[a-zA-Z0-9_-]+\\/file\\/[a-zA-Z0-9]{0,8}$)"
+          }
+        },
+        "example": {
+          "url": "https://mega.nz/file/4p5V3bza#zOcak0Cut0g9hUCbki5nEsFLAFZGVzewNCt4ZnBI0TY"
+        }
+      },
+      "GDriveURL": {
+        "description": "Google Drive URL",
+        "type": "object",
+        "required": ["url"],
+        "properties": {
+          "url": {
+            "type": "string",
+            "pattern": "(^https:\\/\\/drive\\.google\\.com\\/file\\/d\\/.*?\\/.*?\\?.*$|^https:\\/\\/drive\\.google\\.com\\/drive\\/folders\\/.*\\?.*$)"
+          }
+        },
+        "example": {
+          "url": "https://drive.google.com/file/d/1Hq6pzgixPXAjNReijVfBLtJxMUU8cKmU/view?usp=sharing"
+        }
+      },
+      "DirectURL": {
+        "description": "Direct download link",
+        "type": "object",
+        "required": ["url"],
+        "properties": {
+          "url": {
+            "type": "string",
+            "pattern": "https?:\\/\\/(www\\.)?[-a-zA-Z0-9@:%._\\+~#=]{1,256}\\.[a-zA-Z0-9()]{1,6}\\b([-a-zA-Z0-9()@:%_\\+.~#?&//=]*)"
+          }
+        },
+        "example": {
+          "url": "https://github.com/Niweera/niwder-api/archive/refs/tags/v0.1.1.zip"
+        }
+      },
+      "MagnetURL": {
+        "description": "Magnet link",
+        "type": "object",
+        "required": ["url"],
+        "properties": {
+          "url": {
+            "type": "string",
+            "pattern": "magnet:\\?xt=urn:[a-zA-Z0-9]+:[a-zA-Z0-9]+&?.*"
+          }
+        },
+        "example": {
+          "url": "magnet:?xt=urn:btih:bba0e98f114a1414eb808bdd2ce86e852afefdc2&dn=night_of_the_living_dead"
+        }
+      },
+      "TorrentFile": {
+        "description": "Torrent file",
+        "type": "object",
+        "required": ["torrent"],
+        "properties": {
+          "torrent": {
+            "type": "string",
+            "format": "binary"
+          }
+        }
+      }
+    }
+  },
+  "externalDocs": {
+    "description": "Find out more about Niwder-API",
+    "url": "https://github.com/Niweera/niwder-api"
+  }
+}
