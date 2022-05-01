@@ -6,7 +6,7 @@ import FCMService from "../Services/FCMService";
 import type { TransfersData } from "../../utilities/interfaces";
 import FirebaseService from "../Services/FirebaseService";
 import keys from "../../keys";
-import TorrentsService from "./TorrentsService";
+import TorrentsService from "../Services/TorrentsService";
 import type { Instance } from "webtorrent";
 import { db } from "../../database";
 import type { DataSnapshot } from "@firebase/database-types";

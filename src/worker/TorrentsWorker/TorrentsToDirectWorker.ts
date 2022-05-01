@@ -5,7 +5,7 @@ import FCMService from "../Services/FCMService";
 import type { TransfersData } from "../../utilities/interfaces";
 import FirebaseService from "../Services/FirebaseService";
 import keys from "../../keys";
-import TorrentsService from "./TorrentsService";
+import TorrentsService from "../Services/TorrentsService";
 import FileService from "../Services/FileService";
 import type { DirectLinkData } from "../../utilities/interfaces";
 import type { Instance } from "webtorrent";

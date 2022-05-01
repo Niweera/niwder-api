@@ -4,7 +4,7 @@ import path from "path";
 import os from "os";
 import type { Job } from "bullmq";
 import type WebTorrent from "webtorrent";
-import FirebaseService from "../Services/FirebaseService";
+import FirebaseService from "./FirebaseService";
 import mime from "mime-types";
 import type { Instance } from "webtorrent";
 import TorrentsHealthService from "./TorrentsHealthService";
