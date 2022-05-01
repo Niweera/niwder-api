@@ -288,4 +288,41 @@ export default class MegaService {
       }
     });
   };
+
+  public static removeFileFromMega = (
+    uid: string,
+    fileName: string
+  ): Promise<void> => {
+    return new Promise<void>(async (resolve, reject) => {
+      try {
+        const megaCMD: ChildProcessWithoutNullStreams = spawn("mega-rm", [
+          "-r",
+          "-f",
+          `/${keys.MEGA_FOLDER_NAME}/${uid}/${fileName}`,
+        ]);
+
+        megaCMD.stdout.on("data", (data) => {
+          console.log(`MegaCMD stdout: ${data}`);
+        });
+
+        megaCMD.stderr.on("data", (data) => {
+          console.log(`MegaCMD error: ${data}`);
+        });
+
+        megaCMD.on("error", (err) => {
+          return reject(err);
+        });
+
+        megaCMD.on("close", (code) => {
+          if (code === 0) {
+            return resolve();
+          } else {
+            return reject(new Error(`MegaCMD exited with: ${code}`));
+          }
+        });
+      } catch (e) {
+        reject(e);
+      }
+    });
+  };
 }
