@@ -23,7 +23,7 @@ export default class MegaService {
       try {
         const megaCMD: ChildProcessWithoutNullStreams = spawn("mega-export", [
           "-a",
-          `/${keys.MEGA_FOLDER_NAME}/${fileName}`,
+          `/${keys.MEGA_FOLDER_NAME}/${this.job.data.uid}/${fileName}`,
         ]);
         let megaLink: string = "";
 
@@ -74,7 +74,7 @@ export default class MegaService {
         const megaCMD: ChildProcessWithoutNullStreams = spawn("mega-put", [
           "-c",
           filePath,
-          `/${keys.MEGA_FOLDER_NAME}/`,
+          `/${keys.MEGA_FOLDER_NAME}/${this.job.data.uid}/`,
         ]);
 
         megaCMD.stdout.on("data", (data) => {
