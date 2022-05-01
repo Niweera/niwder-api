@@ -107,3 +107,12 @@ process.on("SIGINT", async () => {
     process.exit(0);
   });
 });
+
+process.on("SIGTERM", async () => {
+  await worker.close(true);
+  client.destroy(async (error: Error) => {
+    if (error) console.log(error.message);
+    console.log("WebTorrent client destroyed");
+    process.exit(0);
+  });
+});

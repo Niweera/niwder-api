@@ -31,3 +31,14 @@ process.on("SIGINT", () => {
     }
   });
 });
+
+process.on("SIGTERM", () => {
+  server.close(async (error) => {
+    await FirebaseService.setServerDead(interval);
+    if (error) {
+      process.exit(1);
+    } else {
+      process.exit(0);
+    }
+  });
+});

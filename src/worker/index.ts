@@ -111,3 +111,8 @@ process.on("SIGINT", async () => {
   await worker.close(true);
   process.exit(0);
 });
+
+process.on("SIGTERM", async () => {
+  await worker.close(true);
+  process.exit(0);
+});
