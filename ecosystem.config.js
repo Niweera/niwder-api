@@ -21,5 +21,12 @@ module.exports = {
       instances: "1",
       exec_mode: "cluster",
     },
+    {
+      name: "ndw",
+      script: "./dist/src/worker/DBWorker/index.js",
+      args: ["--color"],
+      instances: "1",
+      exec_mode: "cluster",
+    },
   ],
 };
