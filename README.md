@@ -1,3 +1,5 @@
+[![action status badge](https://github.com/Niweera/niwder-api/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/Niweera/niwder-api/actions)
+
 # Niwder-API
 
 ![image](assets/cover_3.png)
