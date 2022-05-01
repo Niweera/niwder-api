@@ -90,4 +90,31 @@ export default class FirebaseService {
   ): Promise<void> => {
     await db.ref("directLinks").child(fileID).set(data);
   };
+
+  public static removeListeners = (
+    listenToRemovalsCB: (snapshot: DataSnapshot) => void
+  ) => {
+    console.log("Removing all database listeners");
+    db.ref(`transfers`).off("child_removed", listenToRemovalsCB);
+  };
+
+  public static attachDBListeners = (
+    listenToRemovalsCB: (snapshot: DataSnapshot) => void
+  ) => {
+    console.log("Listening to database removals");
+    db.ref(`transfers`).on("child_removed", listenToRemovalsCB);
+  };
+
+  public static getFilePath = async (fileID: string): Promise<string> => {
+    const response: DataSnapshot = await db
+      .ref("directLinks")
+      .child(fileID)
+      .child("filePath")
+      .once("value");
+    return response.val();
+  };
+
+  public static removeDirectLinks = async (fileID: string) => {
+    await db.ref("directLinks").child(fileID).remove();
+  };
 }
