@@ -47,6 +47,16 @@ export default class DBService {
     console.log(`removed ${fileName} [${dbPath}]`);
   };
 
+  private static rmTransfersData = async (
+    uid: string,
+    dbPath: string,
+    key: string
+  ) => {
+    await FirebaseService.removeTransfersData(uid, dbPath, key);
+    await FirebaseService.removeRMTransfers(uid, dbPath, key);
+    console.log(`removed file [${dbPath}]`);
+  };
+
   public static listenToRemovalsCB = async (snapshot: DataSnapshot) => {
     try {
       const snapData: object = snapshot.val();
@@ -62,6 +72,22 @@ export default class DBService {
         await FirebaseService.getTransfersData(uid, dbPath, key);
 
       switch (dbPath) {
+        case keys.MEGA_TO_GDRIVE_QUEUE: {
+          await DBService.rmTransfersData(uid, dbPath, key);
+          break;
+        }
+        case keys.GDRIVE_TO_MEGA_QUEUE: {
+          await DBService.removeMegaFiles(transfersData, uid, dbPath, key);
+          break;
+        }
+        case keys.DIRECT_TO_GDRIVE_QUEUE: {
+          await DBService.rmTransfersData(uid, dbPath, key);
+          break;
+        }
+        case keys.DIRECT_TO_MEGA_QUEUE: {
+          await DBService.removeMegaFiles(transfersData, uid, dbPath, key);
+          break;
+        }
         case keys.GDRIVE_TO_DIRECT_QUEUE: {
           await DBService.removeDirectLinkFiles(
             transfersData,
@@ -80,6 +106,14 @@ export default class DBService {
           );
           break;
         }
+        case keys.TORRENTS_TO_GDRIVE_QUEUE: {
+          await DBService.rmTransfersData(uid, dbPath, key);
+          break;
+        }
+        case keys.TORRENTS_TO_MEGA_QUEUE: {
+          await DBService.removeMegaFiles(transfersData, uid, dbPath, key);
+          break;
+        }
         case keys.TORRENTS_TO_DIRECT_QUEUE: {
           await DBService.removeDirectLinkFiles(
             transfersData,
@@ -87,18 +121,6 @@ export default class DBService {
             dbPath,
             key
           );
-          break;
-        }
-        case keys.GDRIVE_TO_MEGA_QUEUE: {
-          await DBService.removeMegaFiles(transfersData, uid, dbPath, key);
-          break;
-        }
-        case keys.DIRECT_TO_MEGA_QUEUE: {
-          await DBService.removeMegaFiles(transfersData, uid, dbPath, key);
-          break;
-        }
-        case keys.TORRENTS_TO_MEGA_QUEUE: {
-          await DBService.removeMegaFiles(transfersData, uid, dbPath, key);
           break;
         }
         default: {
