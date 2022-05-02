@@ -1,10 +1,10 @@
 import type { Job } from "bullmq";
 import { db } from "../../database";
 import type {
-  TransfersData,
-  TransferringData,
   DirectLinkRecord,
   TorrentsMetadata,
+  TransferringData,
+  TransfersData,
 } from "../../utilities/interfaces";
 import type { DataSnapshot } from "@firebase/database-types";
 
@@ -95,14 +95,14 @@ export default class FirebaseService {
     listenToRemovalsCB: (snapshot: DataSnapshot) => void
   ) => {
     console.log("Removing all database listeners");
-    db.ref(`transfers`).off("child_removed", listenToRemovalsCB);
+    db.ref(`removeTransfers`).off("value", listenToRemovalsCB);
   };
 
   public static attachDBListeners = (
     listenToRemovalsCB: (snapshot: DataSnapshot) => void
   ) => {
     console.log("Listening to database removals");
-    db.ref(`transfers`).on("child_removed", listenToRemovalsCB);
+    db.ref(`removeTransfers`).on("value", listenToRemovalsCB);
   };
 
   public static getFilePath = async (fileID: string): Promise<string> => {
@@ -116,5 +116,39 @@ export default class FirebaseService {
 
   public static removeDirectLinks = async (fileID: string) => {
     await db.ref("directLinks").child(fileID).remove();
+  };
+
+  public static getTransfersData = async (
+    uid: string,
+    dbPath: string,
+    key: string
+  ): Promise<DataSnapshot> => {
+    return await db
+      .ref("transfers")
+      .child(uid)
+      .child(dbPath)
+      .child(key)
+      .once("value");
+  };
+
+  public static removeTransfersData = async (
+    uid: string,
+    dbPath: string,
+    key: string
+  ): Promise<void> => {
+    await db.ref("transfers").child(uid).child(dbPath).child(key).remove();
+  };
+
+  public static removeRMTransfers = async (
+    uid: string,
+    dbPath: string,
+    key: string
+  ): Promise<void> => {
+    await db
+      .ref("removeTransfers")
+      .child(uid)
+      .child(dbPath)
+      .child(key)
+      .remove();
   };
 }
