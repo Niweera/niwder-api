@@ -1,4 +1,4 @@
-import { existsSync, mkdtempSync, readdirSync, rmSync, statSync } from "fs";
+import { existsSync, mkdtempSync, readdirSync, rmSync } from "fs";
 import { ChildProcessWithoutNullStreams, spawn } from "child_process";
 import path from "path";
 import type { Job } from "bullmq";
@@ -8,6 +8,7 @@ import { File as MEGAFile } from "megajs";
 import mime from "mime-types";
 import FirebaseService from "./FirebaseService";
 import keys from "../../keys";
+import fastFolderSizeSync from "fast-folder-size/sync";
 
 export default class MegaService {
   private readonly job: Job;
@@ -184,7 +185,7 @@ export default class MegaService {
                 filePath,
                 fileMimeType:
                   mime.lookup(filePath) || "application/octet-stream",
-                fileSize: file.size,
+                fileSize: fastFolderSizeSync(filePath),
                 directory: file.directory,
               });
             } else {
@@ -229,7 +230,7 @@ export default class MegaService {
                 fileName: downloaded[0],
                 filePath,
                 fileMimeType: "inode/directory",
-                fileSize: 0,
+                fileSize: fastFolderSizeSync(filePath),
                 directory: true,
               });
             } else {
@@ -273,7 +274,7 @@ export default class MegaService {
                 filePath,
                 fileMimeType:
                   mime.lookup(filePath) || "application/octet-stream",
-                fileSize: statSync(filePath).size,
+                fileSize: fastFolderSizeSync(filePath),
                 directory: false,
               });
             } else {
