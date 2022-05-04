@@ -19,6 +19,7 @@ import type { FileObject } from "../../utilities/interfaces";
 import type { Readable } from "stream";
 import os from "os";
 import FirebaseService from "./FirebaseService";
+import fastFolderSizeAsync from "../../utilities/fastFolderSizeAsync";
 
 export default class GDriveService {
   private readonly drive: drive_v3.Drive;
@@ -483,7 +484,7 @@ export default class GDriveService {
       fileName: file.name,
       filePath: pathDir,
       fileMimeType: "inode/directory",
-      fileSize: 0,
+      fileSize: await fastFolderSizeAsync(pathDir),
       directory: true,
     };
   };
