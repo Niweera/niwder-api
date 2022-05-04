@@ -1,6 +1,6 @@
 {
   "name": "niwder-api",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "API for Niwder; Download, upload, and go wild with Mega, Google Drive and direct download links.",
   "main": "dist/index.js",
   "scripts": {
@@ -71,6 +71,7 @@
     "morgan": "^1.10.0",
     "multer": "^1.4.4",
     "parse-torrent": "^9.1.5",
+    "socket.io": "^4.5.0",
     "swagger-ui-express": "^4.3.0",
     "webtorrent": "^1.8.14",
     "webtorrent-health": "^1.1.2"

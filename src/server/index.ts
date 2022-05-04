@@ -10,6 +10,8 @@ import {
 import ErrorHandlingMiddleware from "../middleware/error-handling";
 import FirebaseAuthMiddleware from "../middleware/firebaser";
 import ServeOpenAPI from "../openapi";
+import { SetupSocketIO } from "../middleware/socketIOMiddleware";
+import type { Server as IOServer } from "socket.io";
 
 export const app: Application = express();
 app.disable("x-powered-by");
@@ -24,4 +26,5 @@ FirebaseAuthMiddleware(app);
 app.use("", mainController);
 ErrorHandlingMiddleware(app);
 
+export const io: IOServer = SetupSocketIO(server);
 export default server;

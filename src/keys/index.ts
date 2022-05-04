@@ -25,4 +25,5 @@ export default {
   OAUTH_REDIRECT_URL: "https://niwder.niweera.gq/transfers",
   GDRIVE_FOLDER_NAME: "Niwder",
   MEGA_FOLDER_NAME: "Niwder",
+  SOCKET_IO_CORS: ["http://localhost:9091", "https://niwder.niweera.gq"],
 };

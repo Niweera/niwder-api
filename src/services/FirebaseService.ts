@@ -67,6 +67,7 @@ export default class FirebaseService {
     interval: ReturnType<typeof setInterval>
   ) => {
     try {
+      console.log("Server status DEAD recorded.");
       await db.ref("live").set(false);
       if (interval) clearInterval(interval);
     } catch (e) {

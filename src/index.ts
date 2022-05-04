@@ -1,6 +1,6 @@
 import Keys from "./keys";
 import chalk from "chalk";
-import server from "./server";
+import server, { io } from "./server";
 import FirebaseService from "./services/FirebaseService";
 
 const { PORT } = Keys;
@@ -21,8 +21,11 @@ server.on("close", () => {
   console.log(chalk.yellow("Niwder-API is shutting down"));
 });
 
-process.on("SIGINT", () => {
-  server.close(async (error) => {
+const shutDownAPI = () => {
+  io.close((error: Error) => {
+    if (error) console.log(`Error occurred in Socket.io ${error}`);
+  });
+  server.close(async (error: Error) => {
     await FirebaseService.setServerDead(interval);
     if (error) {
       process.exit(1);
@@ -30,15 +33,7 @@ process.on("SIGINT", () => {
       process.exit(0);
     }
   });
-});
+};
 
-process.on("SIGTERM", () => {
-  server.close(async (error) => {
-    await FirebaseService.setServerDead(interval);
-    if (error) {
-      process.exit(1);
-    } else {
-      process.exit(0);
-    }
-  });
-});
+process.on("SIGINT", shutDownAPI);
+process.on("SIGTERM", shutDownAPI);

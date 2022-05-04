@@ -99,20 +99,14 @@ worker.on("progress", (job: Job, progress: number) => {
   console.log(keys.TORRENTS_QUEUE, job.name, progress);
 });
 
-process.on("SIGINT", async () => {
+const shutDownTorrentsWorker = async () => {
   await worker.close(true);
   client.destroy(async (error: Error) => {
     if (error) console.log(error.message);
     console.log("WebTorrent client destroyed");
     process.exit(0);
   });
-});
+};
 
-process.on("SIGTERM", async () => {
-  await worker.close(true);
-  client.destroy(async (error: Error) => {
-    if (error) console.log(error.message);
-    console.log("WebTorrent client destroyed");
-    process.exit(0);
-  });
-});
+process.on("SIGINT", shutDownTorrentsWorker);
+process.on("SIGTERM", shutDownTorrentsWorker);

@@ -107,12 +107,10 @@ worker.on("progress", (job: Job, progress: number) => {
   console.log(keys.MAIN_QUEUE, job.name, job.data.url, progress);
 });
 
-process.on("SIGINT", async () => {
+const shutDownWorker = async () => {
   await worker.close(true);
   process.exit(0);
-});
+};
 
-process.on("SIGTERM", async () => {
-  await worker.close(true);
-  process.exit(0);
-});
+process.on("SIGINT", shutDownWorker);
+process.on("SIGTERM", shutDownWorker);
