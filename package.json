@@ -73,7 +73,7 @@
     "parse-torrent": "^9.1.5",
     "socket.io": "^4.5.0",
     "swagger-ui-express": "^4.3.0",
-    "webtorrent": "^1.8.14",
+    "webtorrent": "^1.8.16",
     "webtorrent-health": "^1.1.2"
   },
   "engines": {

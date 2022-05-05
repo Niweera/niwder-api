@@ -104,7 +104,7 @@ export default class MegaService {
           if (code === 0) {
             const megaURL: string = await this.getMegaLink(fileName);
             await this.job.updateProgress(98);
-            rmSync(path.dirname(filePath), { recursive: true });
+            rmSync(path.dirname(filePath), { recursive: true, force: true });
             return resolve(megaURL);
           } else {
             return reject(new Error("Error in uploading to Mega.nz"));

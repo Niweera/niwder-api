@@ -548,7 +548,7 @@ export default class GDriveService {
       directory
     );
     await this.job.updateProgress(98);
-    rmSync(path.dirname(filePath), { recursive: true });
+    rmSync(path.dirname(filePath), { recursive: true, force: true });
     return shareLink;
   };
 }

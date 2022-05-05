@@ -24,7 +24,7 @@ export default class DBService {
     if (!fileID) throw new Error("fileID missing");
 
     const filePath: string = await FirebaseService.getFilePath(fileID);
-    rmSync(path.dirname(filePath), { recursive: true });
+    rmSync(path.dirname(filePath), { recursive: true, force: true });
     await FirebaseService.removeDirectLinks(fileID);
     await FirebaseService.removeTransfersData(uid, dbPath, key);
     await FirebaseService.removeRMTransfers(uid, dbPath, key);

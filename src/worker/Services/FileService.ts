@@ -69,7 +69,7 @@ export default class FileService {
           zip.on("close", async (code) => {
             if (code === 0 && existsSync(zipPath)) {
               await this.job.updateProgress(98);
-              rmSync(path.dirname(filePath), { recursive: true });
+              rmSync(path.dirname(filePath), { recursive: true, force: true });
               return resolve({
                 filePath: zipPath,
                 size: statSync(zipPath).size,
