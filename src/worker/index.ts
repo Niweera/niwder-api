@@ -112,5 +112,8 @@ const shutDownWorker = async () => {
   process.exit(0);
 };
 
+process.on("uncaughtException", (err: Error) => {
+  console.error("Uncaught exception:", err.message);
+});
 process.on("SIGINT", shutDownWorker);
 process.on("SIGTERM", shutDownWorker);

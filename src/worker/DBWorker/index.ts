@@ -8,5 +8,8 @@ const shutDownDBWorker = () => {
   process.exit(0);
 };
 
+process.on("uncaughtException", (err: Error) => {
+  console.error("Uncaught exception:", err.message);
+});
 process.on("SIGINT", shutDownDBWorker);
 process.on("SIGTERM", shutDownDBWorker);

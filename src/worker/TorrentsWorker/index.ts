@@ -108,5 +108,8 @@ const shutDownTorrentsWorker = async () => {
   });
 };
 
+process.on("uncaughtException", (err: Error) => {
+  console.error("Uncaught exception:", err.message);
+});
 process.on("SIGINT", shutDownTorrentsWorker);
 process.on("SIGTERM", shutDownTorrentsWorker);

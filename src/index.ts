@@ -35,5 +35,8 @@ const shutDownAPI = () => {
   });
 };
 
+process.on("uncaughtException", (err: Error) => {
+  console.error("Uncaught exception:", err.message);
+});
 process.on("SIGINT", shutDownAPI);
 process.on("SIGTERM", shutDownAPI);
