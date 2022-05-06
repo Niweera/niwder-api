@@ -40,7 +40,7 @@ export default class MegaToDirectWorker {
       fileObject.fileSize
     );
     const transfersData: TransfersData = {
-      gDriveLink: this.job.data.url,
+      megaLink: this.job.data.url,
       directLink: directLinkData.directLink,
       timestamp: ServerValue.TIMESTAMP,
       name: fileObject.directory ? directLinkData.name : fileObject.fileName,
