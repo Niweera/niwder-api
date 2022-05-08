@@ -123,7 +123,10 @@ export default class FileService {
         );
 
         const fileID: string = createHash("sha256")
-          .update(`${this.job.data.uid}/${this.dbPath}/${this.job.name}`)
+          .update(this.job.data.uid)
+          .update(this.dbPath)
+          .update(this.job.name)
+          .update(this.job.id)
           .digest("hex");
 
         const newFileName: string = isDirectory ? fileName + ".zip" : fileName;
