@@ -15,6 +15,7 @@
     "sdw": "nodemon src/worker/DBWorker/index.ts",
     "lint": "eslint . --ext .ts",
     "test": "jest",
+    "setup": "npm run compile && node dist/src/setup/index.js",
     "postinstall": "chmod +x ./postinstall && ./postinstall",
     "develop": "concurrently \"npm:s\" \"npm:sw\" \"npm:stw\" \"npm:sdw\""
   },
@@ -73,6 +74,7 @@
     "parse-torrent": "^9.1.5",
     "socket.io": "^4.5.0",
     "swagger-ui-express": "^4.3.0",
+    "template-file": "^6.0.1",
     "webtorrent": "^1.8.16",
     "webtorrent-health": "^1.1.2"
   },
