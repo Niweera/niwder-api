@@ -40,10 +40,10 @@ export default class DBService {
 
     if (!fileName) throw new Error("fileName missing");
 
-    await MegaService.removeFileFromMega(uid, fileName);
+    await MegaService.removeFileFromMega(uid, key);
     await FirebaseService.removeTransfersData(uid, dbPath, key);
     await FirebaseService.removeRMTransfers(uid, dbPath, key);
-    console.log(`removed ${fileName} [${dbPath}]`);
+    console.log(`removed ${key}/${fileName} [${dbPath}]`);
   };
 
   private static rmTransfersData = async (

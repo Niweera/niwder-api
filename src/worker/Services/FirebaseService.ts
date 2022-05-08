@@ -34,7 +34,8 @@ export default class FirebaseService {
       .ref("transfers")
       .child(this.job.data.uid)
       .child(this.dbPath)
-      .push(data);
+      .child(this.job.id)
+      .set(data);
 
     await this.removeTransferring();
     await this.job.updateProgress(99);
