@@ -1,0 +1,2 @@
+user: gcp
+sys_packages: [ "nginx" ]

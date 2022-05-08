@@ -1,0 +1,109 @@
+---
+- hosts: all
+  gather_facts: true
+  vars_files:
+    - vars/default.yml
+    - vars/credentials.yml
+  tasks:
+    # Setting up Python Environment
+    - name: Add APT-Repository
+      become: true
+      ansible.builtin.apt_repository:
+        repo: 'ppa:deadsnakes/ppa'
+    - name: Update APT
+      become: true
+      apt:
+        upgrade: yes
+        update_cache: yes
+    - name: Install Pre-requisites
+      become: true
+      apt: name={{sys_packages}} state=latest
+  
+    # Setting up Node Environment
+    - name: Setup Node Installation
+      shell: |
+        curl -fsSL https://deb.nodesource.com/setup_16.x | sudo -E bash -
+    - name: Install Node
+      become: true
+      apt:
+        name: nodejs
+        state: latest
+    - name: Install pm2
+      become: true
+      community.general.npm:
+        name: "pm2"
+        global: yes
+  
+    # Setting up Niwder-API VHosts and restart NGINX
+    - name: Copy niwder-api.niweera.gq VHosts file
+      become: true
+      ansible.builtin.copy:
+        src: files/niwder-api.niweera.gq
+        dest: /etc/nginx/sites-available
+        owner: root
+        group: root
+    - name: Enable new site
+      become: true
+      file:
+        src: "/etc/nginx/sites-available/niwder-api.niweera.gq"
+        dest: "/etc/nginx/sites-enabled/niwder-api.niweera.gq"
+        state: link
+    - name: Restart NGINX service
+      become: true
+      ansible.builtin.systemd:
+        name: nginx
+        state: restarted
+  
+    # Setup MegaCMD
+    - name: Download MegaCMD
+      get_url:
+        url: "https://mega.nz/linux/repo/xUbuntu_20.04/amd64/megacmd-xUbuntu_20.04_amd64.deb"
+        dest: /home/gcp/megacmd-xUbuntu_20.04_amd64.deb
+    - name: Install MegaCMD
+      apt: deb="/home/gcp/megacmd-xUbuntu_20.04_amd64.deb" state=present
+      become: true
+  
+    # Setup Niwder-API
+    - name: Clone Niwder-API
+      ansible.builtin.git:
+        repo: https://{{github_credentials}}@github.com/Niweera/niwder-api.git
+        dest: /home/gcp/niwder-api
+    - name: Copy niwder-api .env file
+      ansible.builtin.copy:
+        src: files/niwder-api.env
+        dest: /home/gcp/niwder-api/.env
+    - name: Copy niwder-api service account key JSON file
+      ansible.builtin.copy:
+        src: files/serviceAccountKey.json
+        dest: /home/gcp/niwder-api/src/keys/serviceAccountKey.json
+    - name: Install Niwder-API
+      shell: "npm install"
+      args:
+        chdir: /home/gcp/niwder-api
+    - name: Setup DNS
+      shell: 'npm run setup'
+      args:
+        chdir: /home/gcp/niwder-api
+    - name: Setup Niwder-Files VHosts
+      become: true
+      ansible.builtin.copy:
+        remote_src: yes
+        src: /home/gcp/niwder-api/assets/niwder-files.niweera.gq
+        dest: /etc/nginx/sites-available
+        owner: root
+        group: root
+    - name: Enable Niwder-Files VHost
+      become: true
+      file:
+        src: "/etc/nginx/sites-available/niwder-files.niweera.gq"
+        dest: "/etc/nginx/sites-enabled/niwder-files.niweera.gq"
+        state: link
+    - name: Restart NGINX Service
+      become: true
+      ansible.builtin.systemd:
+        name: nginx
+        state: restarted
+    - name: Start Niwder-API
+      shell: "pm2 start"
+      args:
+        chdir: /home/gcp/niwder-api

@@ -1,0 +1,16 @@
+.idea/
+# credentials
+# Local .terraform directories
+**/.terraform/*
+# .tfstate files
+*.tfstate
+*.tfstate.*
+*.DS_Store
+.terraform.lock.hcl
+niwder-api.env
+serviceAccountKey.json
+credentials.yml
+gcp.key
+credentials.json
+gcp.pub
+variables.tf
