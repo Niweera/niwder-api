@@ -317,7 +317,7 @@ export default class MegaService {
         });
 
         megaCMD.on("close", (code) => {
-          if (code === 0) {
+          if (code === 0 || code === 53) {
             return resolve();
           } else {
             return reject(new Error(`MegaCMD exited with: ${code}`));
