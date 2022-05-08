@@ -1,13 +1,13 @@
 import { existsSync, mkdtempSync, rmSync, statSync } from "fs";
 import type { Job } from "bullmq";
 import FirebaseService from "./FirebaseService";
-import keys from "../../keys";
 import type { DirectFilePath } from "../../utilities/interfaces";
 import { ChildProcessWithoutNullStreams, spawn } from "child_process";
 import path from "path";
 import os from "os";
 import { createHash } from "crypto";
 import type { DirectLinkData } from "../../utilities/interfaces";
+import axios, { AxiosResponse } from "axios";
 
 export default class FileService {
   private readonly job: Job;
@@ -88,6 +88,13 @@ export default class FileService {
     });
   };
 
+  private getIPAddress = async (): Promise<string> => {
+    const response: AxiosResponse = await axios.get(
+      `https://api64.ipify.org?format=json`
+    );
+    return response.data.ip;
+  };
+
   public createDirectLink = async (
     fileName: string,
     filePath: string,
@@ -128,9 +135,14 @@ export default class FileService {
           filePath: isDirectory ? filePathRecord.filePath : filePath,
         });
 
+        const ipAddress: string = await this.getIPAddress();
+        const hostname: string = await firebaseService.getDirectLinkHost(
+          ipAddress
+        );
+
         return resolve({
           name: newFileName,
-          directLink: `${keys.NIWDER_FILE_DIRECT_LINK_HOST}/${fileID}`,
+          directLink: `${hostname}/${fileID}`,
           size: isDirectory ? filePathRecord.size : size,
         });
       } catch (e) {

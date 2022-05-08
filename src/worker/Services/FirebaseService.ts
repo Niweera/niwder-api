@@ -2,11 +2,14 @@ import type { Job } from "bullmq";
 import { db } from "../../database";
 import type {
   DirectLinkRecord,
+  DNS,
+  DNSRecord,
   TorrentsMetadata,
   TransferringData,
   TransfersData,
 } from "../../utilities/interfaces";
 import type { DataSnapshot } from "@firebase/database-types";
+import keys from "../../keys";
 
 export default class FirebaseService {
   private readonly job: Job;
@@ -150,5 +153,24 @@ export default class FirebaseService {
       .child(dbPath)
       .child(key)
       .remove();
+  };
+
+  public getDirectLinkHost = async (ipAddress: string): Promise<string> => {
+    const response: DataSnapshot = await db
+      .ref("dns")
+      .orderByChild("ip")
+      .equalTo(ipAddress)
+      .limitToFirst(1)
+      .once("value");
+
+    const dnsRecords: DNS = response.val();
+
+    if (!dnsRecords) {
+      return keys.NIWDER_FILE_DIRECT_LINK_HOST;
+    }
+
+    const dnsRecord: DNSRecord = Object.values(dnsRecords)[0];
+
+    return `https://${dnsRecord.name}/api/file`;
   };
 }

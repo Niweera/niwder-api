@@ -17,9 +17,7 @@ export default class DBService {
 
     if (!directLink) throw new Error("directLink missing");
 
-    const fileID: string = directLink.split(
-      `${keys.NIWDER_FILE_DIRECT_LINK_HOST}/`
-    )[1];
+    const fileID: string = directLink.split("/").pop();
 
     if (!fileID) throw new Error("fileID missing");
 

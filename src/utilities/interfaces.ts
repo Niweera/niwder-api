@@ -120,3 +120,10 @@ export interface SocketData {
   name: string;
   age: number;
 }
+
+export type DNSRecord = {
+  name: string;
+  ip: string;
+};
+
+export type DNS = DNSRecord[];
