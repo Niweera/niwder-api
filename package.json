@@ -16,8 +16,7 @@
     "lint": "eslint . --ext .ts",
     "test": "jest",
     "setup": "npm run compile && node dist/src/setup/index.js",
-    "postinstall": "chmod +x ./postinstall && ./postinstall",
-    "develop": "concurrently \"npm:s\" \"npm:sw\" \"npm:stw\" \"npm:sdw\""
+    "dev": "concurrently \"npm:s\" \"npm:sw\" \"npm:stw\" \"npm:sdw\""
   },
   "author": "Nipuna Weerasekara",
   "license": "MIT",
@@ -79,7 +78,10 @@
     "webtorrent-health": "^1.1.2"
   },
   "engines": {
-    "node": "v16.14.0",
-    "npm": "8.5.5"
-  }
+    "node": "^16.14.0",
+    "npm": "^8.5.5"
+  },
+  "os": [
+    "linux"
+  ]
 }
