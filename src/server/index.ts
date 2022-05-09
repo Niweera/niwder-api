@@ -10,7 +10,7 @@ import {
 import ErrorHandlingMiddleware from "../middleware/error-handling";
 import FirebaseAuthMiddleware from "../middleware/firebaser";
 import ServeOpenAPI from "../openapi";
-import { SetupSocketIO } from "../middleware/socketIOMiddleware";
+import { SetupSocketIO } from "../socketio";
 import type { Server as IOServer } from "socket.io";
 
 export const app: Application = express();
