@@ -10,6 +10,7 @@ import {
 import ErrorHandlingMiddleware from "../middleware/error-handling";
 import FirebaseAuthMiddleware from "../middleware/firebaser";
 import ServeOpenAPI from "../openapi";
+import ServeBullBoard from "../bull-ui";
 import { SetupSocketIO } from "../socketio";
 import type { Server as IOServer } from "socket.io";
 
@@ -20,6 +21,7 @@ const server: Server = http.createServer(app);
 
 Middleware(app);
 ServeOpenAPI(app);
+ServeBullBoard(app);
 app.use("/api/oauth/callback", oAuthController);
 app.use("/api/file", fileController);
 FirebaseAuthMiddleware(app);

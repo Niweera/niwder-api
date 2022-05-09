@@ -7,6 +7,8 @@ export default {
   USER_ID: process.env.USER_ID,
   FIREBASE_API_KEY: process.env.FIREBASE_API_KEY,
   REDIS_URL: process.env.REDIS_URL,
+  BULL_UI_USERNAME: process.env.BULL_UI_USERNAME,
+  BULL_UI_PASSWORD: process.env.BULL_UI_PASSWORD,
   MAIN_QUEUE: "main-queue",
   TORRENTS_QUEUE: "torrents-queue",
   MEGA_TO_GDRIVE_QUEUE: "mega-to-gdrive",

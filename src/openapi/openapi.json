@@ -72,6 +72,41 @@
         "security": []
       }
     },
+    "/api/bull-ui": {
+      "get": {
+        "operationId": "getBullUI",
+        "responses": {
+          "200": {
+            "description": "Serve Bull-UI",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "message": "Internal Server Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ]
+      }
+    },
     "/api/oauth/callback": {
       "get": {
         "operationId": "getOAuthCallback",
@@ -589,6 +624,11 @@
         "scheme": "bearer",
         "description": "Firebase Authentication JWT token is required",
         "bearerFormat": "JWT"
+      },
+      "basicAuth": {
+        "type": "http",
+        "scheme": "basic",
+        "description": "HTTP Basic Authentication required"
       }
     },
     "schemas": {
