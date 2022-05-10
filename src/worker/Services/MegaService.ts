@@ -24,6 +24,7 @@ export default class MegaService {
       try {
         const megaCMD: ChildProcessWithoutNullStreams = spawn("mega-export", [
           "-a",
+          "-f",
           `/${keys.MEGA_FOLDER_NAME}/${this.job.data.uid}/${this.job.id}/${fileName}`,
         ]);
         let megaLink: string = "";

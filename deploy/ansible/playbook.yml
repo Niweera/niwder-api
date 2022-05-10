@@ -62,6 +62,8 @@
     - name: Install MegaCMD
       apt: deb="/home/gcp/megacmd-xUbuntu_20.04_amd64.deb" state=present
       become: true
+    - name: Sign in to MegaCMD
+      shell: "mega-login {{mega_username}} {{mega_password}}"
   
     # Setup Niwder-API
     - name: Clone Niwder-API
