@@ -4,6 +4,7 @@ import { Job, Queue } from "bullmq";
 import { createHash } from "crypto";
 import parseTorrent from "parse-torrent";
 import type MagnetUri from "magnet-uri";
+import logging from "../middleware/logging";
 
 const connection: IORedis.Redis = new IORedis(keys.REDIS_URL, {
   maxRetriesPerRequest: null,
@@ -45,7 +46,7 @@ export default class Service {
       queueName,
       kwargs
     );
-    console.log(`job added [${job.name}] [${url}]`);
+    logging.info(`job added [${job.name}] [${url}]`);
   };
 
   private torrentToMagnet = (
@@ -69,6 +70,6 @@ export default class Service {
       queueName,
       kwargs
     );
-    console.log(`job added [${job.name}] [${url}]`);
+    logging.info(`job added [${job.name}] [${url}]`);
   };
 }

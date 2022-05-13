@@ -1,6 +1,7 @@
 import { db } from "../database";
 import type { DataSnapshot } from "@firebase/database-types";
 import type { DirectLinkRecord } from "../utilities/interfaces";
+import logging from "../middleware/logging";
 
 export default class FirebaseService {
   public recordRefreshToken = async (
@@ -58,7 +59,7 @@ export default class FirebaseService {
       try {
         await db.ref("live").set(true);
       } catch (e) {
-        console.log(e.message);
+        logging.error(e.message);
       }
     }, 5000);
   };
@@ -67,11 +68,11 @@ export default class FirebaseService {
     interval: ReturnType<typeof setInterval>
   ) => {
     try {
-      console.log("Server status DEAD recorded.");
+      logging.info("Server status DEAD recorded.");
       await db.ref("live").set(false);
       if (interval) clearInterval(interval);
     } catch (e) {
-      console.log(e.message);
+      logging.error(e.message);
     }
   };
 }

@@ -2,6 +2,7 @@ import { Router, Request, Response } from "express";
 import asyncWrapper from "../utilities/async-wrapper";
 import FileService from "../services/FileService";
 import type { ServeFileObject } from "../utilities/interfaces";
+import logging from "../middleware/logging";
 
 const fileController: Router = Router();
 const fileService: FileService = new FileService();
@@ -22,7 +23,7 @@ fileController.get(
           if (!res.headersSent) {
             res.sendStatus(500);
           }
-          console.log("[-] fileController", err.message);
+          logging.error("[-] fileController", err.message);
         }
         res.end();
       });

@@ -59,6 +59,7 @@
     "dotenv": "^16.0.0",
     "express": "^4.17.3",
     "express-basic-auth": "^1.2.1",
+    "express-winston": "^4.2.0",
     "fast-folder-size": "^1.6.2",
     "firebase-admin": "^10.0.2",
     "firebase-auth-express-middleware": "^1.0.8",
@@ -67,6 +68,8 @@
     "ioredis": "^4.28.5",
     "joi": "^17.6.0",
     "lodash": "^4.17.21",
+    "logdna-winston": "^4.0.1",
+    "macaddress": "^0.5.2",
     "magnet-uri": "^6.2.0",
     "megajs": "^1.0.3",
     "mime-types": "^2.1.35",
@@ -76,8 +79,9 @@
     "socket.io": "^4.5.0",
     "swagger-ui-express": "^4.3.0",
     "template-file": "^6.0.1",
-    "webtorrent": "^1.8.16",
-    "webtorrent-health": "^1.1.2"
+    "webtorrent": "^1.8.19",
+    "webtorrent-health": "^1.1.2",
+    "winston": "^3.7.2"
   },
   "engines": {
     "node": "^16.14.0",

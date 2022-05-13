@@ -12,6 +12,7 @@ import type {
   Response,
   Application,
 } from "express";
+import logging from "./logging";
 
 const errorLogger: ErrorRequestHandler = (
   err: any,
@@ -20,10 +21,10 @@ const errorLogger: ErrorRequestHandler = (
   next: NextFunction
 ): void => {
   if (err.message) {
-    console.log(chalk.yellow(err.message));
+    logging.info(chalk.yellow(err.message));
   }
   if (err.stack) {
-    console.log(chalk.red(err.stack));
+    logging.info(chalk.red(err.stack));
   }
   next(err);
 };
