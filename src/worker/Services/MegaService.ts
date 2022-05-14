@@ -46,7 +46,11 @@ export default class MegaService {
           if (code === 0) {
             return resolve(megaLink.split(" ").slice(-1).pop());
           } else {
-            return reject(new Error(`MegaCMD exited with: ${code}`));
+            return reject(
+              new Error(
+                `Error occurred in obtaining Mega.nz links [error code: ${code}]`
+              )
+            );
           }
         });
       } catch (e) {
@@ -64,7 +68,7 @@ export default class MegaService {
         logging.info(`now uploading ${filePath} to Mega.nz\n`);
 
         if (!existsSync(filePath)) {
-          return reject(new Error(`${filePath} is missing`));
+          return reject(new Error(`${fileName} is missing`));
         }
 
         const firebaseService: FirebaseService = new FirebaseService(
@@ -109,7 +113,9 @@ export default class MegaService {
             rmSync(path.dirname(filePath), { recursive: true, force: true });
             return resolve(megaURL);
           } else {
-            return reject(new Error("Error in uploading to Mega.nz"));
+            return reject(
+              new Error(`Error in uploading to Mega.nz [error code: ${code}]`)
+            );
           }
         });
       } catch (e) {
@@ -182,7 +188,7 @@ export default class MegaService {
           megaCMD.on("close", async (code) => {
             if (existsSync(filePath) && code === 0) {
               await this.job.updateProgress(49);
-              resolve({
+              return resolve({
                 fileName: file.name,
                 filePath,
                 fileMimeType:
@@ -192,8 +198,18 @@ export default class MegaService {
                   : file.size,
                 directory: file.directory,
               });
-            } else {
-              reject(new Error(`${filePath} is missing`));
+            }
+
+            if (code === 2) {
+              return reject(new Error(`Download quota for Mega.nz is over`));
+            }
+
+            if (code !== 0) {
+              return reject(
+                new Error(
+                  `Error occurred in downloading from Mega.nz [error code ${code}]`
+                )
+              );
             }
           });
         } else if (folderFolderRe.test(megaURL)) {
@@ -230,15 +246,25 @@ export default class MegaService {
 
             if (existsSync(filePath) && code === 0) {
               await this.job.updateProgress(49);
-              resolve({
+              return resolve({
                 fileName: downloaded[0],
                 filePath,
                 fileMimeType: "inode/directory",
                 fileSize: await fastFolderSizeAsync(filePath),
                 directory: true,
               });
-            } else {
-              reject(new Error(`${filePath} is missing`));
+            }
+
+            if (code === 2) {
+              return reject(new Error(`Download quota for Mega.nz is over`));
+            }
+
+            if (code !== 0) {
+              return reject(
+                new Error(
+                  `Error occurred in downloading from Mega.nz [error code ${code}]`
+                )
+              );
             }
           });
         } else if (folderFileRe.test(megaURL)) {
@@ -273,7 +299,7 @@ export default class MegaService {
 
             if (existsSync(filePath) && code === 0) {
               await this.job.updateProgress(49);
-              resolve({
+              return resolve({
                 fileName: downloaded[0],
                 filePath,
                 fileMimeType:
@@ -281,8 +307,18 @@ export default class MegaService {
                 fileSize: statSync(filePath).size,
                 directory: false,
               });
-            } else {
-              reject(new Error(`${filePath} is missing`));
+            }
+
+            if (code === 2) {
+              return reject(new Error(`Download quota for Mega.nz is over`));
+            }
+
+            if (code !== 0) {
+              return reject(
+                new Error(
+                  `Error occurred in downloading from Mega.nz [error code ${code}]`
+                )
+              );
             }
           });
         } else {
@@ -322,7 +358,11 @@ export default class MegaService {
           if (code === 0 || code === 53) {
             return resolve();
           } else {
-            return reject(new Error(`MegaCMD exited with: ${code}`));
+            return reject(
+              new Error(
+                `Error occurred in removing the Mega.nz files [error code: ${code}]`
+              )
+            );
           }
         });
       } catch (e) {
