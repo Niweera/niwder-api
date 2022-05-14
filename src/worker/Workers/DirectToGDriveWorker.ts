@@ -34,7 +34,8 @@ export default class DirectToGDriveWorker {
     const fileObject: FileObject = await wgetService.downloadToDisk();
     const gDriveService: GDriveService = await GDriveService.build(
       this.job,
-      this.dbPath
+      this.dbPath,
+      logging
     );
     const driveLink: string = await gDriveService.uploadToGDrive(
       fileObject.fileName,

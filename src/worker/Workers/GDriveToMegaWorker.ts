@@ -32,7 +32,8 @@ export default class GDriveToMegaWorker {
     await this.job.updateProgress(0);
     const gDriveService: GDriveService = await GDriveService.build(
       this.job,
-      this.dbPath
+      this.dbPath,
+      logging
     );
     const fileObject: FileObject = await gDriveService.downloadFromGDrive();
     const megaService: MegaService = new MegaService(

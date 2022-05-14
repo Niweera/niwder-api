@@ -66,7 +66,8 @@ export default class TorrentsToGDriveWorker {
           await this.torrentsService.downloadToDisk();
         const gDriveService: GDriveService = await GDriveService.build(
           this.job,
-          this.dbPath
+          this.dbPath,
+          logging
         );
         const driveLink: string = await gDriveService.uploadToGDrive(
           fileObject.fileName,

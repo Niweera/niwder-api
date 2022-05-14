@@ -20,21 +20,30 @@ import type { Readable } from "stream";
 import os from "os";
 import FirebaseService from "./FirebaseService";
 import fastFolderSizeAsync from "../../utilities/fastFolderSizeAsync";
+import type { Logger } from "winston";
 
 export default class GDriveService {
   private readonly drive: drive_v3.Drive;
   private readonly job: Job;
   private readonly dbPath: string;
+  private logging: Logger;
 
-  constructor(job: Job, dbPath: string, drive: drive_v3.Drive) {
+  constructor(
+    job: Job,
+    dbPath: string,
+    drive: drive_v3.Drive,
+    logging: Logger
+  ) {
     this.job = job;
     this.dbPath = dbPath;
     this.drive = drive;
+    this.logging = logging;
   }
 
   public static build = async (
     job: Job,
-    dbPath: string
+    dbPath: string,
+    logging: Logger
   ): Promise<GDriveService> => {
     const firebaseService: FirebaseService = new FirebaseService(job, dbPath);
 
@@ -54,7 +63,7 @@ export default class GDriveService {
         auth: client,
       });
 
-      return new GDriveService(job, dbPath, drive);
+      return new GDriveService(job, dbPath, drive, logging);
     } else {
       throw new Error("refreshToken is missing");
     }

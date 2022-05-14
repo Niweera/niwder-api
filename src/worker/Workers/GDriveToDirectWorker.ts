@@ -32,7 +32,8 @@ export default class GDriveToDirectWorker {
     await this.job.updateProgress(0);
     const gDriveService: GDriveService = await GDriveService.build(
       this.job,
-      this.dbPath
+      this.dbPath,
+      logging
     );
     const fileObject: FileObject = await gDriveService.downloadFromGDrive();
     const fileService: FileService = new FileService(this.job, this.dbPath);
