@@ -36,23 +36,26 @@ Niwder-UI and Niwder-API use [Firebase](https://firebase.google.com/) for hostin
 
 ![image](assets/torrents-download-demo.gif)
 
-This project uses source code
+🔥 This project uses source code
 from [checker.openwebtorrent.com](https://github.com/OpenWebTorrent/checker.openwebtorrent.com)
 by [OpenWebTorrent](https://github.com/OpenWebTorrent).
 
-This project uses [Bull-Board](https://github.com/felixmosh/bull-board) by [felixmosh](https://github.com/felixmosh) to
-visualize queues and jobs currently running in Niwder.io system. Since there is no personal data collected, the
+🎯 This project uses [Bull-Board](https://github.com/felixmosh/bull-board) by [felixmosh](https://github.com/felixmosh)
+to visualize queues and jobs currently running in Niwder.io system. Since there is no personal data collected, the
 Bull-Board job data is perfectly anonymized.
+
+🍭 This project uses [LogDNA](https://www.logdna.com/) and [Winston](https://github.com/winstonjs/winston) for logging
+purposes.
 
 ### Setting up Niwder-API
 
-1. Install Mega-CMD (this will be automatically done by `postinstall` script).
+1. Install Mega-CMD (this will be automatically done by `Ansible` script).
 2. [Log in to Mega-CMD](https://github.com/meganz/MEGAcmd/issues/36) using your email and password.
-3. [Upload a dummy file using `mega-put`, export it](https://github.com/meganz/MEGAcmd/blob/master/UserGuide.md#what-is-it)
-   and accept the license agreement.
-4. Add [Firebase Service Account JSON file](https://firebase.google.com/docs/admin/setup#initialize-sdk) to `/src/keys/`
+3. Add [Firebase Service Account JSON file](https://firebase.google.com/docs/admin/setup#initialize-sdk) to `/src/keys/`
    directory.
-5. Add the following Environment Variables.
+4. Create Google oAuth client ([learn how](https://support.google.com/cloud/answer/6158849?hl=en)).
+5. Get a LogDNA Ingestion key ([learn how](https://docs.logdna.com/docs/ingestion-key)).
+6. Add the following Environment Variables.
 
 ```bash
 PORT=<number>
@@ -62,6 +65,7 @@ GOOGLE_DRIVE_CLIENT_ID=<string>
 GOOGLE_DRIVE_CLIENT_SECRET=<string>
 BULL_UI_USERNAME=<string>
 BULL_UI_PASSWORD=<string>
+LOGDNA_INGESTION_KEY=<string>
 ```
 
 #### Niwder API Specification (OpenAPI v3) is online and can be viewed from [here](https://niwder-api.niweera.gq/api/docs).
