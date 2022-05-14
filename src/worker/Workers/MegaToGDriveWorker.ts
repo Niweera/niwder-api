@@ -7,6 +7,7 @@ import MegaService from "../Services/MegaService";
 import FirebaseService from "../Services/FirebaseService";
 import type { TransfersData } from "../../utilities/interfaces";
 import keys from "../../keys";
+import { WorkerLogger as logging } from "../Services/LoggingService";
 
 export default class MegaToGDriveWorker {
   private readonly job: Job;
@@ -27,7 +28,7 @@ export default class MegaToGDriveWorker {
   };
 
   public run = async (): Promise<void> => {
-    console.log(`now starting transferring ${this.job.data.url}`);
+    logging.info(`now starting transferring ${this.job.data.url}`);
     await this.job.updateProgress(0);
     const megaService: MegaService = new MegaService(this.job, this.dbPath);
     const fileObject: FileObject = await megaService.downloadFromMega();

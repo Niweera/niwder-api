@@ -8,6 +8,7 @@ import DirectToMegaWorker from "./Workers/DirectToMegaWorker";
 import GDriveToDirectWorker from "./Workers/GDriveToDirectWorker";
 import MegaToDirectWorker from "./Workers/MegaToDirectWorker";
 import FCMService from "./Services/FCMService";
+import { WorkerLogger as logging } from "./Services/LoggingService";
 
 const connection: IORedis.Redis = new IORedis(keys.REDIS_URL, {
   maxRetriesPerRequest: null,
@@ -71,27 +72,27 @@ const worker: Worker = new Worker(
 );
 
 worker.on("active", (job: Job) => {
-  console.log(keys.MAIN_QUEUE, job.name, job.data.url, "active");
+  logging.info(keys.MAIN_QUEUE, job.name, job.data.url, "active");
 });
 
 worker.on("closed", () => {
-  console.log(keys.MAIN_QUEUE, "closed");
+  logging.info(keys.MAIN_QUEUE, "closed");
 });
 
 worker.on("closing", () => {
-  console.log(keys.MAIN_QUEUE, "closing");
+  logging.info(keys.MAIN_QUEUE, "closing");
 });
 
 worker.on("completed", (job: Job) => {
-  console.log(keys.MAIN_QUEUE, job.name, job.data.url, "completed");
+  logging.info(keys.MAIN_QUEUE, job.name, job.data.url, "completed");
 });
 
 worker.on("drained", () => {
-  console.log(keys.MAIN_QUEUE, "is empty");
+  logging.info(keys.MAIN_QUEUE, "is empty");
 });
 
 worker.on("error", (error: Error) => {
-  console.error(keys.MAIN_QUEUE, "[-]", error.message);
+  logging.error(keys.MAIN_QUEUE, "[-]", error.message);
 });
 
 worker.on("failed", async (job: Job, error: Error) => {
@@ -100,11 +101,11 @@ worker.on("failed", async (job: Job, error: Error) => {
     job: job.data.url,
     error: error.message,
   });
-  console.log(keys.MAIN_QUEUE, job.name, job.data.url, "[-]", error.message);
+  logging.info(keys.MAIN_QUEUE, job.name, job.data.url, "[-]", error.message);
 });
 
 worker.on("progress", (job: Job, progress: number) => {
-  console.log(keys.MAIN_QUEUE, job.name, job.data.url, progress);
+  logging.info(keys.MAIN_QUEUE, job.name, job.data.url, progress);
 });
 
 const shutDownWorker = async () => {
@@ -113,7 +114,7 @@ const shutDownWorker = async () => {
 };
 
 process.on("uncaughtException", (err: Error) => {
-  console.error("Uncaught exception:", err.message);
+  logging.error("Uncaught exception:", err.message);
 });
 process.on("SIGINT", shutDownWorker);
 process.on("SIGTERM", shutDownWorker);

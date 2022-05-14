@@ -6,6 +6,7 @@ import type { Application, RequestHandler, ErrorRequestHandler } from "express";
 import winston from "winston";
 import getIPAddress from "../utilities/getIPAddress";
 import macAddress from "macaddress";
+import { SPLAT } from "triple-beam";
 
 let ip: string = "192.168.1.1"; //placeholder IP address is set (small price to pay until Express v5)
 let mac: string = "00:00:00:00:00:00"; //placeholder MAC address is set (small price to pay until Express v5)
@@ -30,11 +31,16 @@ const logDNAWinston: any = new LogDNAWinston({
   indexMeta: true,
 });
 
+const transform = winston.format((info) => {
+  info.message = `${info.message} ${(info[SPLAT as any] || []).join(" ")}`;
+  return info;
+});
+
 export default winston.createLogger({
   level: "debug",
   transports: [
     new winston.transports.Console({
-      format: winston.format.simple(),
+      format: winston.format.combine(transform(), winston.format.simple()),
     }),
     logDNAWinston,
   ],
