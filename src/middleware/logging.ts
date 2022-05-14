@@ -1,5 +1,5 @@
 import LogDNAWinston from "logdna-winston";
-import ExpressWinston from "express-winston";
+import ExpressWinston, { LoggerOptions } from "express-winston";
 import keys from "../keys";
 import os from "os";
 import type { Application, RequestHandler, ErrorRequestHandler } from "express";
@@ -38,17 +38,16 @@ const transform = winston.format((info) => {
 
 export default winston.createLogger({
   level: "debug",
-  transports: [
-    new winston.transports.Console({
-      format: winston.format.combine(transform(), winston.format.simple()),
-    }),
-    logDNAWinston,
-  ],
+  transports: [new winston.transports.Console(), logDNAWinston],
+  format: winston.format.combine(transform(), winston.format.simple()),
   exitOnError: false,
 });
 
-const options = {
+const options: LoggerOptions = {
   transports: [logDNAWinston],
+  meta: true,
+  expressFormat: true,
+  format: winston.format.combine(transform(), winston.format.simple()),
 };
 
 export const WinstonLogger = (app: Application): void => {

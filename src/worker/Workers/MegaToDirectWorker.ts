@@ -7,6 +7,7 @@ import type { TransfersData } from "../../utilities/interfaces";
 import FirebaseService from "../Services/FirebaseService";
 import MegaService from "../Services/MegaService";
 import keys from "../../keys";
+import { WorkerLogger as logging } from "../Services/LoggingService";
 
 export default class MegaToDirectWorker {
   private readonly job: Job;
@@ -21,7 +22,7 @@ export default class MegaToDirectWorker {
     fileName: string,
     link: string
   ): Promise<void> => {
-    const fcmService: FCMService = new FCMService(this.job.data.uid);
+    const fcmService: FCMService = new FCMService(this.job.data.uid, logging);
     await fcmService.sendFCM(fileName, link);
     await this.job.updateProgress(100);
   };

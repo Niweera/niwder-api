@@ -22,7 +22,7 @@ export default class MegaToGDriveWorker {
     fileName: string,
     link: string
   ): Promise<void> => {
-    const fcmService: FCMService = new FCMService(this.job.data.uid);
+    const fcmService: FCMService = new FCMService(this.job.data.uid, logging);
     await fcmService.sendFCM(fileName, link);
     await this.job.updateProgress(100);
   };

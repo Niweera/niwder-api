@@ -96,7 +96,7 @@ worker.on("error", (error: Error) => {
 });
 
 worker.on("failed", async (job: Job, error: Error) => {
-  const fcmService: FCMService = new FCMService(job.data.uid);
+  const fcmService: FCMService = new FCMService(job.data.uid, logging);
   await fcmService.sendErrorMessage({
     job: job.data.url,
     error: error.message,

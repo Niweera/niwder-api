@@ -11,6 +11,7 @@ import type { DirectLinkData } from "../../utilities/interfaces";
 import type { Instance } from "webtorrent";
 import { db } from "../../database";
 import type { DataSnapshot } from "@firebase/database-types";
+import { TorrentsWorkerLogger as logging } from "../Services/LoggingService";
 
 export default class TorrentsToDirectWorker {
   private readonly job: Job;
@@ -33,7 +34,7 @@ export default class TorrentsToDirectWorker {
     fileName: string,
     link: string
   ): Promise<void> => {
-    const fcmService: FCMService = new FCMService(this.job.data.uid);
+    const fcmService: FCMService = new FCMService(this.job.data.uid, logging);
     await fcmService.sendFCM(fileName, link);
     await this.job.updateProgress(100);
   };

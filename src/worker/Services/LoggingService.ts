@@ -37,12 +37,8 @@ const createLogger = (app: string): Logger => {
 
   return winston.createLogger({
     level: "debug",
-    transports: [
-      new winston.transports.Console({
-        format: winston.format.combine(transform(), winston.format.simple()),
-      }),
-      logDNAWinston,
-    ],
+    transports: [new winston.transports.Console(), logDNAWinston],
+    format: winston.format.combine(transform(), winston.format.simple()),
     exitOnError: false,
   });
 };

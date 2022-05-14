@@ -10,6 +10,7 @@ import MegaService from "../Services/MegaService";
 import type { Instance } from "webtorrent";
 import { db } from "../../database";
 import type { DataSnapshot } from "@firebase/database-types";
+import { TorrentsWorkerLogger as logging } from "../Services/LoggingService";
 
 export default class TorrentsToMegaWorker {
   private readonly job: Job;
@@ -32,7 +33,7 @@ export default class TorrentsToMegaWorker {
     fileName: string,
     link: string
   ): Promise<void> => {
-    const fcmService: FCMService = new FCMService(this.job.data.uid);
+    const fcmService: FCMService = new FCMService(this.job.data.uid, logging);
     await fcmService.sendFCM(fileName, link);
     await this.job.updateProgress(100);
   };

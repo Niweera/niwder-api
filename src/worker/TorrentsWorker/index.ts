@@ -7,6 +7,7 @@ import TorrentsToDirectWorker from "./TorrentsToDirectWorker";
 import FCMService from "../Services/FCMService";
 import WebTorrent, { Instance } from "webtorrent";
 import FirebaseService from "../Services/FirebaseService";
+import { TorrentsWorkerLogger as logging } from "../Services/LoggingService";
 
 const connection: IORedis.Redis = new IORedis(keys.REDIS_URL, {
   maxRetriesPerRequest: null,
@@ -74,7 +75,7 @@ worker.on("error", (error: Error) => {
 });
 
 worker.on("failed", async (job: Job, error: Error) => {
-  const fcmService: FCMService = new FCMService(job.data.uid);
+  const fcmService: FCMService = new FCMService(job.data.uid, logging);
   await fcmService.sendErrorMessage({
     job: job.data.url,
     error: error.message,

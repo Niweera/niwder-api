@@ -4,11 +4,15 @@ import { BatchResponse, getMessaging } from "firebase-admin/messaging";
 import type { MulticastMessage } from "firebase-admin/lib/messaging/messaging-api";
 import type { DataSnapshot } from "@firebase/database-types";
 import type { FCMDataPayload } from "../../utilities/interfaces";
+import type { Logger } from "winston";
 
 export default class FCMService {
   private ref: database.Reference;
-  constructor(uid: string) {
+  private logging: Logger;
+
+  constructor(uid: string, logging: Logger) {
     this.ref = db.ref("fcmKeys").child(uid);
+    this.logging = logging;
   }
 
   private getFCMKeys = async (): Promise<string[]> => {
@@ -30,7 +34,7 @@ export default class FCMService {
       tokens: fcmKeys,
     };
     const response: BatchResponse = await getMessaging().sendMulticast(message);
-    console.log(
+    this.logging.info(
       "multicast completed with success count: ",
       response.successCount
     );
@@ -46,7 +50,7 @@ export default class FCMService {
       tokens: fcmKeys,
     };
     const response: BatchResponse = await getMessaging().sendMulticast(message);
-    console.log(
+    this.logging.info(
       "multicast completed with success count: ",
       response.successCount
     );
