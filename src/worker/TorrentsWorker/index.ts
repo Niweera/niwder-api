@@ -7,7 +7,7 @@ import TorrentsToDirectWorker from "./TorrentsToDirectWorker";
 import FCMService from "../Services/FCMService";
 import WebTorrent, { Instance } from "webtorrent";
 import FirebaseService from "../Services/FirebaseService";
-import { TorrentsWorkerLogger as logging } from "../Services/LoggingService";
+import logging from "../Services/LoggingService";
 
 const connection: IORedis.Redis = new IORedis(keys.REDIS_URL, {
   maxRetriesPerRequest: null,
@@ -51,31 +51,31 @@ const worker: Worker = new Worker(
 );
 
 worker.on("active", (job: Job) => {
-  console.log(keys.TORRENTS_QUEUE, job.name, job.data.url, "active");
+  logging.info(keys.TORRENTS_QUEUE, job.name, job.data.url, "active");
 });
 
 worker.on("closed", () => {
-  console.log(keys.TORRENTS_QUEUE, "closed");
+  logging.info(keys.TORRENTS_QUEUE, "closed");
 });
 
 worker.on("closing", () => {
-  console.log(keys.TORRENTS_QUEUE, "closing");
+  logging.info(keys.TORRENTS_QUEUE, "closing");
 });
 
 worker.on("completed", (job: Job) => {
-  console.log(keys.TORRENTS_QUEUE, job.name, job.data.url, "completed");
+  logging.info(keys.TORRENTS_QUEUE, job.name, job.data.url, "completed");
 });
 
 worker.on("drained", () => {
-  console.log(keys.TORRENTS_QUEUE, "is empty");
+  logging.info(keys.TORRENTS_QUEUE, "is empty");
 });
 
 worker.on("error", (error: Error) => {
-  console.error(keys.TORRENTS_QUEUE, "[-]", error.message);
+  logging.error(keys.TORRENTS_QUEUE, "[-]", error.message);
 });
 
 worker.on("failed", async (job: Job, error: Error) => {
-  const fcmService: FCMService = new FCMService(job.data.uid, logging);
+  const fcmService: FCMService = new FCMService(job.data.uid);
   await fcmService.sendErrorMessage({
     job: job.data.url,
     error: error.message,
@@ -87,7 +87,7 @@ worker.on("failed", async (job: Job, error: Error) => {
   );
   await firebaseService.removeTransferring();
 
-  console.log(
+  logging.error(
     keys.TORRENTS_QUEUE,
     job.name,
     job.data.url,
@@ -97,20 +97,20 @@ worker.on("failed", async (job: Job, error: Error) => {
 });
 
 worker.on("progress", (job: Job, progress: number) => {
-  console.log(keys.TORRENTS_QUEUE, job.name, progress);
+  logging.info(keys.TORRENTS_QUEUE, job.name, progress);
 });
 
 const shutDownTorrentsWorker = async () => {
   await worker.close(true);
   client.destroy(async (error: Error) => {
-    if (error) console.log(error.message);
-    console.log("WebTorrent client destroyed");
+    if (error) logging.error(error.message);
+    logging.info("WebTorrent client destroyed");
     process.exit(0);
   });
 };
 
 process.on("uncaughtException", (err: Error) => {
-  console.error("Uncaught exception:", err.message);
+  logging.error("Uncaught exception:", err.message);
 });
 process.on("SIGINT", shutDownTorrentsWorker);
 process.on("SIGTERM", shutDownTorrentsWorker);

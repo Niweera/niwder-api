@@ -1,6 +1,6 @@
 import LogDNAWinston from "logdna-winston";
 import os from "os";
-import winston, { Logger } from "winston";
+import winston, { Logform } from "winston";
 import macAddress from "macaddress";
 import getIPAddress from "../../utilities/getIPAddress";
 import keys from "../../keys";
@@ -17,36 +17,26 @@ macAddress
   .then((res) => (mac = res))
   .catch();
 
-const createLogger = (app: string): Logger => {
-  const logDNAWinston: any = new LogDNAWinston({
-    key: keys.LOGDNA_INGESTION_KEY,
-    hostname: os.hostname(),
-    ip: ip,
-    mac: mac,
-    app: app,
-    handleExceptions: true,
-    env: "Production",
-    level: "debug",
-    indexMeta: true,
-  });
+const logDNAWinston: any = new LogDNAWinston({
+  key: keys.LOGDNA_INGESTION_KEY,
+  hostname: os.hostname(),
+  ip: ip,
+  mac: mac,
+  app: "Niwder-Worker",
+  handleExceptions: true,
+  env: "Production",
+  level: "debug",
+  indexMeta: true,
+});
 
-  const transform = winston.format((info) => {
-    info.message = `${info.message} ${(info[SPLAT as any] || []).join(" ")}`;
-    return info;
-  });
+const transform: Logform.FormatWrap = winston.format((info) => {
+  info.message = `${info.message} ${(info[SPLAT as any] || []).join(" ")}`;
+  return info;
+});
 
-  return winston.createLogger({
-    level: "debug",
-    transports: [new winston.transports.Console(), logDNAWinston],
-    format: winston.format.combine(transform(), winston.format.simple()),
-    exitOnError: false,
-  });
-};
-
-export const WorkerLogger: Logger = createLogger("Niwder-Worker");
-
-export const DBWorkerLogger: Logger = createLogger("Niwder-DBWorker");
-
-export const TorrentsWorkerLogger: Logger = createLogger(
-  "Niwder-Torrents-Worker"
-);
+export default winston.createLogger({
+  level: "debug",
+  transports: [new winston.transports.Console(), logDNAWinston],
+  format: winston.format.combine(transform(), winston.format.simple()),
+  exitOnError: false,
+});

@@ -7,7 +7,7 @@ import MegaService from "../Services/MegaService";
 import FirebaseService from "../Services/FirebaseService";
 import type { TransfersData } from "../../utilities/interfaces";
 import keys from "../../keys";
-import { WorkerLogger as logging } from "../Services/LoggingService";
+import logging from "../Services/LoggingService";
 
 export default class MegaToGDriveWorker {
   private readonly job: Job;
@@ -22,7 +22,7 @@ export default class MegaToGDriveWorker {
     fileName: string,
     link: string
   ): Promise<void> => {
-    const fcmService: FCMService = new FCMService(this.job.data.uid, logging);
+    const fcmService: FCMService = new FCMService(this.job.data.uid);
     await fcmService.sendFCM(fileName, link);
     await this.job.updateProgress(100);
   };
@@ -30,16 +30,11 @@ export default class MegaToGDriveWorker {
   public run = async (): Promise<void> => {
     logging.info(`now starting transferring ${this.job.data.url}`);
     await this.job.updateProgress(0);
-    const megaService: MegaService = new MegaService(
-      this.job,
-      this.dbPath,
-      logging
-    );
+    const megaService: MegaService = new MegaService(this.job, this.dbPath);
     const fileObject: FileObject = await megaService.downloadFromMega();
     const gDriveService: GDriveService = await GDriveService.build(
       this.job,
-      this.dbPath,
-      logging
+      this.dbPath
     );
     const driveLink: string = await gDriveService.uploadToGDrive(
       fileObject.fileName,

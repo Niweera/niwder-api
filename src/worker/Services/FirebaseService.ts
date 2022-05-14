@@ -10,6 +10,7 @@ import type {
 } from "../../utilities/interfaces";
 import type { DataSnapshot } from "@firebase/database-types";
 import keys from "../../keys";
+import logging from "../Services/LoggingService";
 
 export default class FirebaseService {
   private readonly job: Job;
@@ -98,14 +99,14 @@ export default class FirebaseService {
   public static removeListeners = (
     listenToRemovalsCB: (snapshot: DataSnapshot) => void
   ) => {
-    console.log("Removing all database listeners");
+    logging.info("Removing all database listeners");
     db.ref(`removeTransfers`).off("value", listenToRemovalsCB);
   };
 
   public static attachDBListeners = (
     listenToRemovalsCB: (snapshot: DataSnapshot) => void
   ) => {
-    console.log("Listening to database removals");
+    logging.info("Listening to database removals");
     db.ref(`removeTransfers`).on("value", listenToRemovalsCB);
   };
 

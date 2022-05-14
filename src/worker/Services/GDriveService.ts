@@ -20,30 +20,22 @@ import type { Readable } from "stream";
 import os from "os";
 import FirebaseService from "./FirebaseService";
 import fastFolderSizeAsync from "../../utilities/fastFolderSizeAsync";
-import type { Logger } from "winston";
+import logging from "../Services/LoggingService";
 
 export default class GDriveService {
   private readonly drive: drive_v3.Drive;
   private readonly job: Job;
   private readonly dbPath: string;
-  private logging: Logger;
 
-  constructor(
-    job: Job,
-    dbPath: string,
-    drive: drive_v3.Drive,
-    logging: Logger
-  ) {
+  constructor(job: Job, dbPath: string, drive: drive_v3.Drive) {
     this.job = job;
     this.dbPath = dbPath;
     this.drive = drive;
-    this.logging = logging;
   }
 
   public static build = async (
     job: Job,
-    dbPath: string,
-    logging: Logger
+    dbPath: string
   ): Promise<GDriveService> => {
     const firebaseService: FirebaseService = new FirebaseService(job, dbPath);
 
@@ -63,7 +55,7 @@ export default class GDriveService {
         auth: client,
       });
 
-      return new GDriveService(job, dbPath, drive, logging);
+      return new GDriveService(job, dbPath, drive);
     } else {
       throw new Error("refreshToken is missing");
     }
@@ -366,7 +358,7 @@ export default class GDriveService {
           })
           .on("data", async (d) => {
             progress += d.length;
-            console.log(
+            logging.info(
               "\x1b[A\x1b[G\x1b[2K%s: %s - %s of %s",
               file.name.slice(0, Math.max(0, process.stdout.columns - 32)),
               Math.round((progress / Number(file.size)) * 100) + "%",
@@ -502,7 +494,7 @@ export default class GDriveService {
     return new Promise<FileObject>(async (resolve, reject) => {
       try {
         const gDriveLink: string = this.job.data.url;
-        console.log(`now downloading ${gDriveLink}\n`);
+        logging.info(`now downloading ${gDriveLink}\n`);
 
         const tempDir: string = mkdtempSync(
           path.join(os.tmpdir(), "niwder-tmp")
@@ -549,7 +541,7 @@ export default class GDriveService {
     fileMimeType: string,
     directory: boolean
   ): Promise<string> => {
-    console.log(`now uploading ${filePath} to GDrive`);
+    logging.info(`now uploading ${filePath} to GDrive`);
     const shareLink: string = await this.uploadFile(
       fileName,
       filePath,

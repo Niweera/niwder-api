@@ -1,5 +1,6 @@
 import FirebaseService from "../Services/FirebaseService";
 import DBService from "../Services/DBService";
+import logging from "../Services/LoggingService";
 
 FirebaseService.attachDBListeners(DBService.listenToRemovalsCB);
 
@@ -9,7 +10,7 @@ const shutDownDBWorker = () => {
 };
 
 process.on("uncaughtException", (err: Error) => {
-  console.error("Uncaught exception:", err.message);
+  logging.error("Uncaught exception:", err.message);
 });
 process.on("SIGINT", shutDownDBWorker);
 process.on("SIGTERM", shutDownDBWorker);

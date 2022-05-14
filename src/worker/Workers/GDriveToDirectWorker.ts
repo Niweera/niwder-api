@@ -7,7 +7,7 @@ import FileService from "../Services/FileService";
 import type { TransfersData } from "../../utilities/interfaces";
 import FirebaseService from "../Services/FirebaseService";
 import keys from "../../keys";
-import { WorkerLogger as logging } from "../Services/LoggingService";
+import logging from "../Services/LoggingService";
 
 export default class GDriveToDirectWorker {
   private readonly job: Job;
@@ -22,18 +22,17 @@ export default class GDriveToDirectWorker {
     fileName: string,
     link: string
   ): Promise<void> => {
-    const fcmService: FCMService = new FCMService(this.job.data.uid, logging);
+    const fcmService: FCMService = new FCMService(this.job.data.uid);
     await fcmService.sendFCM(fileName, link);
     await this.job.updateProgress(100);
   };
 
   public run = async (): Promise<void> => {
-    console.log(`now starting transferring ${this.job.data.url}`);
+    logging.info(`now starting transferring ${this.job.data.url}`);
     await this.job.updateProgress(0);
     const gDriveService: GDriveService = await GDriveService.build(
       this.job,
-      this.dbPath,
-      logging
+      this.dbPath
     );
     const fileObject: FileObject = await gDriveService.downloadFromGDrive();
     const fileService: FileService = new FileService(this.job, this.dbPath);

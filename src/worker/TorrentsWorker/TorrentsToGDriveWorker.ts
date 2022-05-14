@@ -10,7 +10,7 @@ import TorrentsService from "../Services/TorrentsService";
 import type { Instance } from "webtorrent";
 import { db } from "../../database";
 import type { DataSnapshot } from "@firebase/database-types";
-import { TorrentsWorkerLogger as logging } from "../Services/LoggingService";
+import logging from "../Services/LoggingService";
 
 export default class TorrentsToGDriveWorker {
   private readonly job: Job;
@@ -33,7 +33,7 @@ export default class TorrentsToGDriveWorker {
     fileName: string,
     link: string
   ): Promise<void> => {
-    const fcmService: FCMService = new FCMService(this.job.data.uid, logging);
+    const fcmService: FCMService = new FCMService(this.job.data.uid);
     await fcmService.sendFCM(fileName, link);
     await this.job.updateProgress(100);
   };
@@ -60,14 +60,13 @@ export default class TorrentsToGDriveWorker {
           `removeTorrents/${this.job.data.uid}/${this.dbPath}/${this.job.id}`
         ).on("value", this.dbCB(reject));
 
-        console.log(`now starting transferring ${this.job.data.url}`);
+        logging.info(`now starting transferring ${this.job.data.url}`);
         await this.job.updateProgress(0);
         const fileObject: FileObject =
           await this.torrentsService.downloadToDisk();
         const gDriveService: GDriveService = await GDriveService.build(
           this.job,
-          this.dbPath,
-          logging
+          this.dbPath
         );
         const driveLink: string = await gDriveService.uploadToGDrive(
           fileObject.fileName,

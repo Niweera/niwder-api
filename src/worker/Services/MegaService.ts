@@ -9,17 +9,15 @@ import mime from "mime-types";
 import FirebaseService from "./FirebaseService";
 import keys from "../../keys";
 import fastFolderSizeAsync from "../../utilities/fastFolderSizeAsync";
-import type { Logger } from "winston";
+import logging from "../Services/LoggingService";
 
 export default class MegaService {
   private readonly job: Job;
   private readonly dbPath: string;
-  private logging: Logger;
 
-  constructor(job: Job, dbPath: string, logging: Logger) {
+  constructor(job: Job, dbPath: string) {
     this.job = job;
     this.dbPath = dbPath;
-    this.logging = logging;
   }
 
   private getMegaLink = async (fileName: string): Promise<string> => {
@@ -37,7 +35,7 @@ export default class MegaService {
         });
 
         megaCMD.stderr.on("data", (data) => {
-          this.logging.info(`MegaCMD error: ${data}`);
+          logging.info(`MegaCMD error: ${data}`);
         });
 
         megaCMD.on("error", (err) => {
@@ -63,7 +61,7 @@ export default class MegaService {
   ): Promise<string> => {
     return new Promise<string>((resolve, reject) => {
       try {
-        this.logging.info(`now uploading ${filePath} to Mega.nz\n`);
+        logging.info(`now uploading ${filePath} to Mega.nz\n`);
 
         if (!existsSync(filePath)) {
           return reject(new Error(`${filePath} is missing`));
@@ -83,11 +81,11 @@ export default class MegaService {
         ]);
 
         megaCMD.stdout.on("data", (data) => {
-          console.log(`\x1b[A\x1b[G\x1b[2K${data}`);
+          logging.info(`\x1b[A\x1b[G\x1b[2K${data}`);
         });
 
         megaCMD.stderr.on("data", async (data) => {
-          console.log(`\x1b[A\x1b[G\x1b[2K${data}`);
+          logging.info(`\x1b[A\x1b[G\x1b[2K${data}`);
           const percentage: string = data
             .toString()
             .replace(percentageRe, "$1");
@@ -124,7 +122,7 @@ export default class MegaService {
     return new Promise<FileObject>(async (resolve, reject) => {
       try {
         const megaURL: string = this.job.data.url;
-        this.logging.info(`now downloading ${megaURL}`);
+        logging.info(`now downloading ${megaURL}`);
 
         const firebaseService: FirebaseService = new FirebaseService(
           this.job,
@@ -160,11 +158,11 @@ export default class MegaService {
           ]);
 
           megaCMD.stdout.on("data", (data) => {
-            console.log(`\x1b[A\x1b[G\x1b[2K${data}`);
+            logging.info(`\x1b[A\x1b[G\x1b[2K${data}`);
           });
 
           megaCMD.stderr.on("data", async (data) => {
-            console.log(`\x1b[A\x1b[G\x1b[2K${data}`);
+            logging.info(`\x1b[A\x1b[G\x1b[2K${data}`);
             const percentage: string = data
               .toString()
               .replace(percentageRe, "$1");
@@ -205,11 +203,11 @@ export default class MegaService {
           ]);
 
           megaCMD.stdout.on("data", (data) => {
-            console.log(`\x1b[A\x1b[G\x1b[2K${data}`);
+            logging.info(`\x1b[A\x1b[G\x1b[2K${data}`);
           });
 
           megaCMD.stderr.on("data", async (data) => {
-            console.log(`\x1b[A\x1b[G\x1b[2K${data}`);
+            logging.info(`\x1b[A\x1b[G\x1b[2K${data}`);
             const percentage: string = data
               .toString()
               .replace(percentageRe, "$1");
@@ -250,11 +248,11 @@ export default class MegaService {
           ]);
 
           megaCMD.stdout.on("data", (data) => {
-            console.log(`\x1b[A\x1b[G\x1b[2K${data}`);
+            logging.info(`\x1b[A\x1b[G\x1b[2K${data}`);
           });
 
           megaCMD.stderr.on("data", async (data) => {
-            console.log(`\x1b[A\x1b[G\x1b[2K${data}`);
+            logging.info(`\x1b[A\x1b[G\x1b[2K${data}`);
             const percentage: string = data
               .toString()
               .replace(percentageRe, "$1");
@@ -309,11 +307,11 @@ export default class MegaService {
         ]);
 
         megaCMD.stdout.on("data", (data) => {
-          console.log(`MegaCMD stdout: ${data}`);
+          logging.info(`MegaCMD stdout: ${data}`);
         });
 
         megaCMD.stderr.on("data", (data) => {
-          console.log(`MegaCMD error: ${data}`);
+          logging.info(`MegaCMD error: ${data}`);
         });
 
         megaCMD.on("error", (err) => {

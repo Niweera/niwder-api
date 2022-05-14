@@ -6,6 +6,7 @@ import { ChildProcessWithoutNullStreams, spawn } from "child_process";
 import mime from "mime-types";
 import type { Job } from "bullmq";
 import FirebaseService from "./FirebaseService";
+import logging from "../Services/LoggingService";
 
 export default class WGETService {
   private readonly job: Job;
@@ -20,7 +21,7 @@ export default class WGETService {
     return new Promise<FileObject>(async (resolve, reject) => {
       try {
         const url: string = this.job.data.url;
-        console.log(`now downloading ${url}\n\n`);
+        logging.info(`now downloading ${url}\n\n`);
 
         const firebaseService: FirebaseService = new FirebaseService(
           this.job,
@@ -44,11 +45,11 @@ export default class WGETService {
         ]);
 
         wget.stdout.on("data", (data) => {
-          console.log(`\x1b[A\x1b[G\x1b[2K${data}`);
+          logging.info(`\x1b[A\x1b[G\x1b[2K${data}`);
         });
 
         wget.stderr.on("data", async (data) => {
-          console.log(`\x1b[A\x1b[G\x1b[2K${data}`);
+          logging.info(`\x1b[A\x1b[G\x1b[2K${data}`);
           const percentage: string = data
             .toString()
             .replace(percentageRe, "$1");

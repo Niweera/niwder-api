@@ -1,11 +1,59 @@
 import { renderFile } from "template-file";
 import axios, { AxiosResponse } from "axios";
 import { existsSync, writeFileSync } from "fs";
+import type { ServiceAccount } from "firebase-admin";
 import * as firebase from "firebase-admin";
 import * as serviceAccount from "../keys/serviceAccountKey.json";
-import type { ServiceAccount } from "firebase-admin";
 import { Database, getDatabase } from "firebase-admin/database";
 import type { DataSnapshot } from "@firebase/database-types";
+import LogDNAWinston from "logdna-winston";
+import os from "os";
+import macAddress from "macaddress";
+import keys from "../keys";
+import winston, { Logform, Logger } from "winston";
+import { SPLAT } from "triple-beam";
+
+let ip: string = "192.168.1.1";
+let mac: string = "00:00:00:00:00:00";
+
+const getIPAddress = async (): Promise<string> => {
+  const response: AxiosResponse = await axios.get(
+    `https://api64.ipify.org?format=json`
+  );
+  return response.data.ip;
+};
+
+getIPAddress()
+  .then((res) => (ip = res))
+  .catch();
+macAddress
+  .one()
+  .then((res) => (mac = res))
+  .catch();
+
+const logDNAWinston: any = new LogDNAWinston({
+  key: keys.LOGDNA_INGESTION_KEY,
+  hostname: os.hostname(),
+  ip: ip,
+  mac: mac,
+  app: "Niwder-Worker",
+  handleExceptions: true,
+  env: "Production",
+  level: "debug",
+  indexMeta: true,
+});
+
+const transform: Logform.FormatWrap = winston.format((info) => {
+  info.message = `${info.message} ${(info[SPLAT as any] || []).join(" ")}`;
+  return info;
+});
+
+const logging: Logger = winston.createLogger({
+  level: "debug",
+  transports: [new winston.transports.Console(), logDNAWinston],
+  format: winston.format.combine(transform(), winston.format.simple()),
+  exitOnError: false,
+});
 
 firebase.initializeApp({
   credential: firebase.credential.cert(serviceAccount as ServiceAccount),
@@ -26,7 +74,7 @@ const getNewServerID = async (): Promise<number> => {
   const dnsRecords: DNS = response.val();
 
   if (!dnsRecords) {
-    console.log(`New ServerID: 0`);
+    logging.info(`New ServerID: 0`);
     return 0;
   }
 
@@ -43,7 +91,7 @@ const getNewServerID = async (): Promise<number> => {
     ? serverIDs.pop() + 1
     : 0;
 
-  console.log(`New ServerID: ${newServerID}`);
+  logging.info(`New ServerID: ${newServerID}`);
   return newServerID;
 };
 
@@ -58,17 +106,7 @@ const setupVHost = async (serverID: number): Promise<void> => {
   const vhost: string = await renderFile(vhostPath, { server_id: serverID });
 
   writeFileSync(finalVHostPath, vhost);
-  console.log("VHost file created");
-};
-
-const getIPAddress = async (): Promise<string> => {
-  const response: AxiosResponse = await axios.get(
-    `https://api64.ipify.org?format=json`
-  );
-
-  const ipAddress: string = response.data.ip;
-  console.log("ipAddress:", ipAddress);
-  return ipAddress;
+  logging.info("VHost file created");
 };
 
 const allowCreateDNSRecord = async (
@@ -84,7 +122,7 @@ const allowCreateDNSRecord = async (
   const dnsRecords: DNS = response.val();
 
   if (!dnsRecords) {
-    console.log("DNS record creation allowed: true");
+    logging.info("DNS record creation allowed: true");
     return true;
   }
 
@@ -94,7 +132,7 @@ const allowCreateDNSRecord = async (
 
   const isAllowed: boolean = !Boolean(dnsNames.length);
 
-  console.log("DNS record creation allowed:", isAllowed);
+  logging.info("DNS record creation allowed:", isAllowed);
   return isAllowed;
 };
 
@@ -111,7 +149,7 @@ const createDNSRecord = async (
     name: serverName,
   });
 
-  console.log(`DNS record created for ${serverName} :=> ${ipAddress}`);
+  logging.info(`DNS record created for ${serverName} :=> ${ipAddress}`);
 };
 
 (async () => {
@@ -123,7 +161,7 @@ const createDNSRecord = async (
     await createDNSRecord(serverName, ipAddress);
     process.exit(0);
   } catch (e) {
-    console.log(e);
+    logging.error(e);
     process.exit(0);
   }
 })();

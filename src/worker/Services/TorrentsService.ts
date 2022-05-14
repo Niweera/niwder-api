@@ -9,6 +9,7 @@ import mime from "mime-types";
 import type { Instance } from "webtorrent";
 import TorrentsHealthService from "./TorrentsHealthService";
 import type { TorrentsHealth } from "../../utilities/interfaces";
+import logging from "../Services/LoggingService";
 
 export default class TorrentsService {
   private readonly job: Job;
@@ -89,29 +90,29 @@ export default class TorrentsService {
   private logTorrentsData =
     (event: string): (() => void) =>
     () => {
-      console.log("\n");
-      console.log("name", this.torrent.name);
-      console.log("event", event);
-      console.log(
+      logging.info("\n");
+      logging.info("name", this.torrent.name);
+      logging.info("event", event);
+      logging.info(
         "progress",
         Math.round((this.torrent.progress || 0) * 100),
         "%"
       );
-      console.log("timeRemaining", this.torrent.timeRemaining);
-      console.log("numPeers", this.torrent.numPeers);
-      console.log("downloadSpeed", this.torrent.downloadSpeed);
-      console.log("uploadSpeed", this.torrent.uploadSpeed);
-      console.log("length", this.torrent.length);
-      console.log("downloaded", this.torrent.downloaded);
-      console.log("uploaded", this.torrent.uploaded);
-      console.log("\n");
+      logging.info("timeRemaining", this.torrent.timeRemaining);
+      logging.info("numPeers", this.torrent.numPeers);
+      logging.info("downloadSpeed", this.torrent.downloadSpeed);
+      logging.info("uploadSpeed", this.torrent.uploadSpeed);
+      logging.info("length", this.torrent.length);
+      logging.info("downloaded", this.torrent.downloaded);
+      logging.info("uploaded", this.torrent.uploaded);
+      logging.info("\n");
     };
 
   public downloadToDisk = async (): Promise<FileObject> => {
     return new Promise<FileObject>(async (resolve, reject) => {
       try {
         const url: string = this.job.data.url;
-        console.log(`now downloading ${url}\n\n`);
+        logging.info(`now downloading ${url}\n\n`);
 
         this.torrent.on("infoHash", this.recordMetadata);
         this.torrent.on("metadata", this.logTorrentsData("metadata"));
@@ -125,7 +126,7 @@ export default class TorrentsService {
         });
 
         this.torrent.on("download", () => {
-          console.log(
+          logging.info(
             `\x1b[A\x1b[G\x1b[2K${this.torrent.name}: ${Math.round(
               this.torrent.progress * 100
             )}%`
@@ -177,7 +178,7 @@ export default class TorrentsService {
         if (error) {
           reject(error);
         } else {
-          console.log("Torrent destroyed");
+          logging.info("Torrent destroyed");
           resolve();
         }
       });

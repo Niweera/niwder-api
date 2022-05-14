@@ -5,6 +5,7 @@ import FirebaseService from "./FirebaseService";
 import { rmSync } from "fs";
 import path from "path";
 import MegaService from "./MegaService";
+import logging from "../Services/LoggingService";
 
 export default class DBService {
   public static removeDirectLinkFiles = async (
@@ -27,7 +28,7 @@ export default class DBService {
     await FirebaseService.removeDirectLinks(fileID);
     await FirebaseService.removeTransfersData(uid, dbPath, key);
     await FirebaseService.removeRMTransfers(uid, dbPath, key);
-    console.log(`removed ${filePath} [${dbPath}]`);
+    logging.info(`removed ${filePath} [${dbPath}]`);
   };
 
   public static removeMegaFiles = async (
@@ -43,7 +44,7 @@ export default class DBService {
     await MegaService.removeFileFromMega(uid, key);
     await FirebaseService.removeTransfersData(uid, dbPath, key);
     await FirebaseService.removeRMTransfers(uid, dbPath, key);
-    console.log(`removed ${key}/${fileName} [${dbPath}]`);
+    logging.info(`removed ${key}/${fileName} [${dbPath}]`);
   };
 
   private static rmTransfersData = async (
@@ -53,7 +54,7 @@ export default class DBService {
   ) => {
     await FirebaseService.removeTransfersData(uid, dbPath, key);
     await FirebaseService.removeRMTransfers(uid, dbPath, key);
-    console.log(`removed file [${dbPath}]`);
+    logging.info(`removed file [${dbPath}]`);
   };
 
   public static listenToRemovalsCB = async (snapshot: DataSnapshot) => {
@@ -127,7 +128,7 @@ export default class DBService {
         }
       }
     } catch (e) {
-      console.log(e.message);
+      logging.error(e.message);
     }
   };
 }

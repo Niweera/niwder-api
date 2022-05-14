@@ -8,6 +8,7 @@ import os from "os";
 import { createHash } from "crypto";
 import type { DirectLinkData } from "../../utilities/interfaces";
 import axios, { AxiosResponse } from "axios";
+import logging from "../Services/LoggingService";
 
 export default class FileService {
   private readonly job: Job;
@@ -59,7 +60,7 @@ export default class FileService {
           });
 
           zip.stderr.on("data", async (data) => {
-            console.log(`stderr: ${data}`);
+            logging.info(`stderr: ${data}`);
           });
 
           zip.on("error", (err) => {
@@ -104,7 +105,7 @@ export default class FileService {
   ): Promise<DirectLinkData> => {
     return new Promise<DirectLinkData>(async (resolve, reject) => {
       try {
-        console.log(`now creating direct link to ${filePath}\n`);
+        logging.info(`now creating direct link to ${filePath}\n`);
 
         if (!existsSync(filePath)) {
           return reject(new Error(`${filePath} is missing`));

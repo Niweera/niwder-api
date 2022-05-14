@@ -8,7 +8,7 @@ import DirectToMegaWorker from "./Workers/DirectToMegaWorker";
 import GDriveToDirectWorker from "./Workers/GDriveToDirectWorker";
 import MegaToDirectWorker from "./Workers/MegaToDirectWorker";
 import FCMService from "./Services/FCMService";
-import { WorkerLogger as logging } from "./Services/LoggingService";
+import logging from "./Services/LoggingService";
 
 const connection: IORedis.Redis = new IORedis(keys.REDIS_URL, {
   maxRetriesPerRequest: null,
@@ -96,12 +96,12 @@ worker.on("error", (error: Error) => {
 });
 
 worker.on("failed", async (job: Job, error: Error) => {
-  const fcmService: FCMService = new FCMService(job.data.uid, logging);
+  const fcmService: FCMService = new FCMService(job.data.uid);
   await fcmService.sendErrorMessage({
     job: job.data.url,
     error: error.message,
   });
-  logging.info(keys.MAIN_QUEUE, job.name, job.data.url, "[-]", error.message);
+  logging.error(keys.MAIN_QUEUE, job.name, job.data.url, "[-]", error.message);
 });
 
 worker.on("progress", (job: Job, progress: number) => {
