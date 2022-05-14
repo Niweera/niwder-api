@@ -35,7 +35,11 @@ export default class GDriveToMegaWorker {
       this.dbPath
     );
     const fileObject: FileObject = await gDriveService.downloadFromGDrive();
-    const megaService: MegaService = new MegaService(this.job, this.dbPath);
+    const megaService: MegaService = new MegaService(
+      this.job,
+      this.dbPath,
+      logging
+    );
     const megaLink: string = await megaService.uploadToMega(
       fileObject.fileName,
       fileObject.filePath

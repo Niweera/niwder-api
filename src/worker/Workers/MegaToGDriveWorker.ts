@@ -30,7 +30,11 @@ export default class MegaToGDriveWorker {
   public run = async (): Promise<void> => {
     logging.info(`now starting transferring ${this.job.data.url}`);
     await this.job.updateProgress(0);
-    const megaService: MegaService = new MegaService(this.job, this.dbPath);
+    const megaService: MegaService = new MegaService(
+      this.job,
+      this.dbPath,
+      logging
+    );
     const fileObject: FileObject = await megaService.downloadFromMega();
     const gDriveService: GDriveService = await GDriveService.build(
       this.job,

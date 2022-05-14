@@ -30,7 +30,11 @@ export default class MegaToDirectWorker {
   public run = async (): Promise<void> => {
     console.log(`now starting transferring ${this.job.data.url}`);
     await this.job.updateProgress(0);
-    const megaService: MegaService = new MegaService(this.job, this.dbPath);
+    const megaService: MegaService = new MegaService(
+      this.job,
+      this.dbPath,
+      logging
+    );
     const fileObject: FileObject = await megaService.downloadFromMega();
     const fileService: FileService = new FileService(this.job, this.dbPath);
     const directLinkData: DirectLinkData = await fileService.createDirectLink(

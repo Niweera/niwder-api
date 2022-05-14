@@ -9,14 +9,17 @@ import mime from "mime-types";
 import FirebaseService from "./FirebaseService";
 import keys from "../../keys";
 import fastFolderSizeAsync from "../../utilities/fastFolderSizeAsync";
+import type { Logger } from "winston";
 
 export default class MegaService {
   private readonly job: Job;
   private readonly dbPath: string;
+  private logging: Logger;
 
-  constructor(job: Job, dbPath: string) {
+  constructor(job: Job, dbPath: string, logging: Logger) {
     this.job = job;
     this.dbPath = dbPath;
+    this.logging = logging;
   }
 
   private getMegaLink = async (fileName: string): Promise<string> => {
@@ -34,7 +37,7 @@ export default class MegaService {
         });
 
         megaCMD.stderr.on("data", (data) => {
-          console.log(`MegaCMD error: ${data}`);
+          this.logging.info(`MegaCMD error: ${data}`);
         });
 
         megaCMD.on("error", (err) => {
@@ -60,7 +63,7 @@ export default class MegaService {
   ): Promise<string> => {
     return new Promise<string>((resolve, reject) => {
       try {
-        console.log(`now uploading ${filePath} to Mega.nz\n`);
+        this.logging.info(`now uploading ${filePath} to Mega.nz\n`);
 
         if (!existsSync(filePath)) {
           return reject(new Error(`${filePath} is missing`));
@@ -121,7 +124,7 @@ export default class MegaService {
     return new Promise<FileObject>(async (resolve, reject) => {
       try {
         const megaURL: string = this.job.data.url;
-        console.log(`now downloading ${megaURL}`);
+        this.logging.info(`now downloading ${megaURL}`);
 
         const firebaseService: FirebaseService = new FirebaseService(
           this.job,
