@@ -5,12 +5,15 @@ import type { MulticastMessage } from "firebase-admin/lib/messaging/messaging-ap
 import type { DataSnapshot } from "@firebase/database-types";
 import type { FCMDataPayload } from "../../utilities/interfaces";
 import logging from "../Services/LoggingService";
+import FirebaseService from "./FirebaseService";
 
 export default class FCMService {
-  private ref: database.Reference;
+  private readonly ref: database.Reference;
+  private readonly uid: string;
 
   constructor(uid: string) {
     this.ref = db.ref("fcmKeys").child(uid);
+    this.uid = uid;
   }
 
   private getFCMKeys = async (): Promise<string[]> => {
@@ -19,6 +22,8 @@ export default class FCMService {
   };
 
   public sendFCM = async (title: string, body: string): Promise<void> => {
+    await FirebaseService.setNotification(this.uid, title, body);
+
     const fcmKeys: string[] = await this.getFCMKeys();
 
     if (!fcmKeys.length) return;
@@ -39,6 +44,8 @@ export default class FCMService {
   };
 
   public sendErrorMessage = async (data: FCMDataPayload): Promise<void> => {
+    await FirebaseService.setErrorNotification(this.uid, data.job, data.error);
+
     const fcmKeys: string[] = await this.getFCMKeys();
 
     if (!fcmKeys.length) return;

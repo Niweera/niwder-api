@@ -175,4 +175,28 @@ export default class FirebaseService {
 
     return `https://${dnsRecord.name}/api/file`;
   };
+
+  public static setNotification = async (
+    uid: string,
+    title: string,
+    body: string
+  ): Promise<void> => {
+    try {
+      await db.ref("notifications").child(uid).set({ title, body });
+    } catch (e) {
+      logging.error(e.message);
+    }
+  };
+
+  public static setErrorNotification = async (
+    uid: string,
+    job: string,
+    error: string
+  ): Promise<void> => {
+    try {
+      await db.ref("notifications").child(uid).set({ job, error });
+    } catch (e) {
+      logging.error(e.message);
+    }
+  };
 }
