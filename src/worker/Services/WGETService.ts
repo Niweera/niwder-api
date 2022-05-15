@@ -1,5 +1,5 @@
 import type { FileObject } from "../../utilities/interfaces";
-import { mkdtempSync, readdirSync, statSync } from "fs";
+import { mkdtempSync, readdirSync, renameSync, statSync } from "fs";
 import path from "path";
 import os from "os";
 import { ChildProcessWithoutNullStreams, spawn } from "child_process";
@@ -41,7 +41,9 @@ export default class WGETService {
           "-q",
           "--show-progress",
           "--progress",
-          "bar:force:noscroll",
+          "bar:force",
+          "--trust-server-names",
+          "--content-disposition",
         ]);
 
         wget.stdout.on("data", (data) => {
@@ -69,20 +71,37 @@ export default class WGETService {
 
         wget.on("close", async (code) => {
           let files: string[] = readdirSync(tempDir);
+
           if (files.length > 0 && code === 0) {
-            const filePath: string = path.join(tempDir, files[0]);
+            const fileRe: RegExp = new RegExp(/(.*)\?.*/g);
+
+            let finalFileName: string = files[0];
+            let finalFilePath: string = path.join(tempDir, finalFileName);
+
+            if (fileRe.test(finalFileName)) {
+              const newFileName: string = finalFileName.replace(fileRe, "$1");
+              let newFilePath: string = path.join(tempDir, newFileName);
+              renameSync(finalFilePath, newFilePath);
+              finalFileName = newFileName;
+              finalFilePath = newFilePath;
+            }
+
             await this.job.updateProgress(49);
             resolve({
-              fileName: files[0],
-              filePath: filePath,
-              fileMimeType: statSync(filePath).isDirectory()
+              fileName: finalFileName,
+              filePath: finalFilePath,
+              fileMimeType: statSync(finalFilePath).isDirectory()
                 ? "inode/directory"
-                : mime.lookup(filePath) || "application/octet-stream",
-              fileSize: statSync(filePath).size,
-              directory: statSync(filePath).isDirectory(),
+                : mime.lookup(finalFilePath) || "application/octet-stream",
+              fileSize: statSync(finalFilePath).size,
+              directory: statSync(finalFilePath).isDirectory(),
             });
           } else {
-            reject(new Error(`Downloaded file is missing`));
+            reject(
+              new Error(
+                `Error occurred in downloading file [error code ${code}]`
+              )
+            );
           }
         });
       } catch (e) {
