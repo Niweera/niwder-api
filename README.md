@@ -1,8 +1,20 @@
 [![action status badge](https://github.com/Niweera/niwder-api/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/Niweera/niwder-api/actions)
 
-# Niwder-API
+```
+ __    __  __                      __                      __           
+|  \  |  \|  \                    |  \                    |  \          
+| $$\ | $$ \$$ __   __   __   ____| $$  ______    ______   \$$  ______  
+| $$$\| $$|  \|  \ |  \ |  \ /      $$ /      \  /      \ |  \ /      \
+| $$$$\ $$| $$| $$ | $$ | $$|  $$$$$$$|  $$$$$$\|  $$$$$$\| $$|  $$$$$$\
+| $$\$$ $$| $$| $$ | $$ | $$| $$  | $$| $$    $$| $$   \$$| $$| $$  | $$
+| $$ \$$$$| $$| $$_/ $$_/ $$| $$__| $$| $$$$$$$$| $$ __   | $$| $$__/ $$
+| $$  \$$$| $$ \$$   $$   $$ \$$    $$ \$$     \| $$|  \  | $$ \$$    $$
+\$$   \$$ \$$  \$$$$$\$$$$   \$$$$$$$  \$$$$$$$ \$$ \$$   \$$  \$$$$$$
+```
 
 ![image](assets/cover_3.png)
+
+# Niwder-API
 
 Niwder (a combo of words, [NIWeera](https://github.com/Niweera), DownloadER) is a long time dream of mine (actually I
 got this idea around 2017, thanks to [nisalb](https://github.com/nisalb)), and I tried to realize this dream for years
