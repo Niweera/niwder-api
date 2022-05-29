@@ -12,7 +12,7 @@
  \$$   \$$ \$$  \$$$$$\$$$$   \$$$$$$$  \$$$$$$$ \$$ \$$   \$$  \$$$$$$
 ```
 
-![image](assets/cover_3.png)
+![image](animated.gif)
 
 # Niwder-API
 
