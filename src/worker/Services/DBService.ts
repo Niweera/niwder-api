@@ -8,6 +8,7 @@ import MegaService from "./MegaService";
 import logging from "../Services/LoggingService";
 import type { Worker, Job } from "bullmq";
 import FCMService from "./FCMService";
+import type { Instance } from "webtorrent";
 
 export default class DBService {
   public static removeDirectLinkFiles = async (
@@ -60,7 +61,8 @@ export default class DBService {
   };
 
   public static listenToInterruptions =
-    (worker: Worker, job: Job) => async (snapshot: DataSnapshot) => {
+    (worker: Worker, job: Job, client?: Instance) =>
+    async (snapshot: DataSnapshot) => {
       try {
         const snapData: object = snapshot.val();
         if (!snapData) return;
@@ -76,18 +78,29 @@ export default class DBService {
           dbPath === job.data.queue &&
           uid === job.data.uid
         ) {
-          await worker.close(true);
           const firebaseService: FirebaseService = new FirebaseService(
             job,
             job.data.queue
           );
-          await firebaseService.removeTransferring();
-          await firebaseService.removeInterruptions();
+
+          if (client) {
+            client.destroy((error: Error) => {
+              if (error) logging.error(error.message);
+              logging.info("WebTorrent client destroyed");
+            });
+
+            await firebaseService.removeTorrentsMetadata();
+            await firebaseService.removeRMTorrentsData();
+          }
+
+          await worker.close(true);
           const fcmService: FCMService = new FCMService(job.data.uid);
           await fcmService.sendErrorMessage({
             job: job.data.url,
             error: "Transfer interrupted by the user",
           });
+          await firebaseService.removeTransferring();
+          await firebaseService.removeInterruptions();
           logging.info(`Job ${job.id} interrupted by user`);
           process.exit(0);
         }

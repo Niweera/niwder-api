@@ -22,7 +22,7 @@ const worker: Worker = new Worker(
   async (job: Job) => {
     try {
       FirebaseService.attachInterruptionsListener(
-        DBService.listenToInterruptions(worker, job)
+        DBService.listenToInterruptions(worker, job, client)
       );
 
       switch (job.data.queue) {
