@@ -9,6 +9,8 @@ import GDriveToDirectWorker from "./Workers/GDriveToDirectWorker";
 import MegaToDirectWorker from "./Workers/MegaToDirectWorker";
 import FCMService from "./Services/FCMService";
 import logging from "./Services/LoggingService";
+import FirebaseService from "./Services/FirebaseService";
+import DBService from "./Services/DBService";
 
 const connection: IORedis.Redis = new IORedis(keys.REDIS_URL, {
   maxRetriesPerRequest: null,
@@ -19,6 +21,10 @@ const worker: Worker = new Worker(
   keys.MAIN_QUEUE,
   async (job: Job) => {
     try {
+      FirebaseService.attachInterruptionsListener(
+        DBService.listenToInterruptions(worker, job)
+      );
+
       switch (job.data.queue) {
         case keys.MEGA_TO_GDRIVE_QUEUE: {
           const megaToGDriveWorker: MegaToGDriveWorker = new MegaToGDriveWorker(
@@ -85,6 +91,7 @@ worker.on("closing", () => {
 
 worker.on("completed", (job: Job) => {
   logging.info(keys.MAIN_QUEUE, job.name, job.data.url, "completed");
+  FirebaseService.removeInterruptionsListeners();
 });
 
 worker.on("drained", () => {
@@ -102,6 +109,7 @@ worker.on("failed", async (job: Job, error: Error) => {
     error: error.message,
   });
   logging.error(keys.MAIN_QUEUE, job.name, job.data.url, "[-]", error.message);
+  FirebaseService.removeInterruptionsListeners();
 });
 
 worker.on("progress", (job: Job, progress: number) => {
@@ -109,6 +117,7 @@ worker.on("progress", (job: Job, progress: number) => {
 });
 
 const shutDownWorker = async () => {
+  FirebaseService.removeInterruptionsListeners();
   await worker.close(true);
   process.exit(0);
 };

@@ -30,6 +30,15 @@ export default class FirebaseService {
       .remove();
   };
 
+  public removeInterruptions = async () => {
+    await db
+      .ref("interruptions")
+      .child(this.job.data.uid)
+      .child(this.dbPath)
+      .child(this.job.id)
+      .remove();
+  };
+
   public recordDownloadURL = async (data: TransfersData): Promise<void> => {
     await db
       .ref("transfers")
@@ -103,11 +112,23 @@ export default class FirebaseService {
     db.ref(`removeTransfers`).off("value", listenToRemovalsCB);
   };
 
+  public static removeInterruptionsListeners = () => {
+    logging.info("Removing all database listeners");
+    db.ref(`interruptions`).off("value");
+  };
+
   public static attachDBListeners = (
     listenToRemovalsCB: (snapshot: DataSnapshot) => void
   ) => {
     logging.info("Listening to database removals");
     db.ref(`removeTransfers`).on("value", listenToRemovalsCB);
+  };
+
+  public static attachInterruptionsListener = (
+    listenToInterruptions: (snapshot: DataSnapshot) => void
+  ) => {
+    logging.info("Listening to worker interruptions");
+    db.ref(`interruptions`).on("value", listenToInterruptions);
   };
 
   public static getFilePath = async (fileID: string): Promise<string> => {

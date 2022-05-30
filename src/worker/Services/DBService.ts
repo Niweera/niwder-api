@@ -6,6 +6,8 @@ import { rmSync } from "fs";
 import path from "path";
 import MegaService from "./MegaService";
 import logging from "../Services/LoggingService";
+import type { Worker, Job } from "bullmq";
+import FCMService from "./FCMService";
 
 export default class DBService {
   public static removeDirectLinkFiles = async (
@@ -56,6 +58,43 @@ export default class DBService {
     await FirebaseService.removeRMTransfers(uid, dbPath, key);
     logging.info(`removed file [${dbPath}]`);
   };
+
+  public static listenToInterruptions =
+    (worker: Worker, job: Job) => async (snapshot: DataSnapshot) => {
+      try {
+        const snapData: object = snapshot.val();
+        if (!snapData) return;
+
+        const uid: string = Object.keys(snapData)[0];
+        const doc: object = get(snapData, uid, "");
+        const dbPath: string = Object.keys(doc)[0];
+        const keyObj: object = get(doc, dbPath, "");
+        const key: string = Object.keys(keyObj)[0];
+
+        if (
+          key === job.id &&
+          dbPath === job.data.queue &&
+          uid === job.data.uid
+        ) {
+          await worker.close(true);
+          const firebaseService: FirebaseService = new FirebaseService(
+            job,
+            job.data.queue
+          );
+          await firebaseService.removeTransferring();
+          await firebaseService.removeInterruptions();
+          const fcmService: FCMService = new FCMService(job.data.uid);
+          await fcmService.sendErrorMessage({
+            job: job.data.url,
+            error: "Transfer interrupted by the user",
+          });
+          logging.info(`Job ${job.id} interrupted by user`);
+          process.exit(0);
+        }
+      } catch (e) {
+        logging.error(e.message);
+      }
+    };
 
   public static listenToRemovalsCB = async (snapshot: DataSnapshot) => {
     try {
